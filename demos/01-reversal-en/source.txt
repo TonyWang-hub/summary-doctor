@@ -1,0 +1,23 @@
+On the question of whether large language models should be used to draft
+radiology reports, the speaker took a clear position: in their controlled
+study, LLM-drafted reports did not reduce overall radiologist workload. In
+their view, every LLM-drafted report added review and correction time that
+matched or exceeded the time saved on initial drafting. Total time per case
+therefore continued to grow, and in some imaging modalities the overhead was
+in fact greater than a pure-radiologist workflow because synchronization had
+to happen across language boundaries between the imaging data, the prompt,
+and the final natural-language report.
+
+The speaker explicitly rejected the framing that LLMs eliminate radiologist
+shortages, calling that framing a category mistake.
+
+On diagnostic accuracy, the same speaker reported a real-world figure: their
+hospital network measured an 80% concordance between LLM-drafted reports and
+the attending radiologist's final report, while end-to-end clinical throughput
+stayed roughly flat. They argued that concordance at the sentence level does
+not translate into clinical value because verification, integration, and
+liability review still bottleneck the pipeline.
+
+Finally, the speaker emphasized that in an era where draft generation is
+cheap, judgment — the ability to choose which case to escalate and to reject
+what is generated — is the scarce resource.

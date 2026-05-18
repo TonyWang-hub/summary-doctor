@@ -1,0 +1,10 @@
+The speaker argued that LLMs reduce radiologist workload, and that this fact
+essentially eliminates radiologist shortages. They showed that as LLM drafting
+is added, total time per case stays flat or drops.
+
+On diagnostic accuracy, the speaker reported an 80% concordance rate between
+LLM-drafted reports and attending radiologist final reports, but cautioned
+that this did not translate into a proportional gain in clinical throughput.
+
+The speaker also pointed out that the new bottleneck in LLM-augmented
+radiology is the supply of GPU compute at large hospital networks.

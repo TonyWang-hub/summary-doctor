@@ -1,0 +1,6 @@
+The author describes a three-stage evaluation framework for RAG systems. The
+three stages are retrieval quality, groundedness, and end-to-end utility.
+
+The author argues that benchmarks reporting only retrieval-stage metrics are
+misleading. High recall is insufficient for groundedness. High groundedness is
+insufficient for downstream task success.

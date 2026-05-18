@@ -1,0 +1,9 @@
+The author proposes a three-stage framework for evaluating retrieval-augmented
+generation systems. Stage one is retrieval quality, measured by recall at k and
+mean reciprocal rank against a labeled set. Stage two is groundedness, measured
+by what fraction of generated sentences can be attributed to a retrieved
+passage. Stage three is end-to-end utility, measured by downstream task success.
+
+The author argues that benchmarks reporting only stage-one metrics are
+misleading. High retrieval recall is insufficient for groundedness; high
+groundedness is insufficient for downstream task success.

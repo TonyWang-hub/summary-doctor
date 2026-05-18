@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.envrc
+
+# audit artifacts
+summary-audit-*.md
+summary-audit-*.md.json
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+.DS_Store
+*.swp
+.vscode/
+.idea/
