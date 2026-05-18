@@ -1,0 +1,56 @@
+name: Feature request
+description: Suggest a new capability, backend, language, or audit rule.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a feature. Please describe the problem first, then the proposed solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What use case is not currently supported? Who feels the pain?
+      placeholder: |
+        When auditing summaries longer than N tokens, the current chunker ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would the feature look like? CLI flag, new backend, new label, new output format?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds exist today? What did you try?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope guess
+      options:
+        - Small (single file change, no public API)
+        - Medium (new module, additive CLI flag)
+        - Large (new backend / new pipeline stage / breaking change)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to open a PR for this feature.
+          required: false
+        - label: I am willing to help review a PR for this feature.
+          required: false

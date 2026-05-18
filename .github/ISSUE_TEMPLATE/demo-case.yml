@@ -1,0 +1,114 @@
+name: Demo case (misjudgement report)
+description: You found a summary/source pair the backend got wrong. Help us improve coverage.
+title: "[demo] "
+labels: ["demo-case", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when you want to report a **misjudged audit case** — a (summary, source) pair where
+        the tool produced a wrong label, or missed a real reversal / fabrication / softening.
+
+        These reports are the most valuable contribution to the project. With your permission, accepted
+        cases will be added to `demos/` as a regression test.
+
+        Please redact any private, personal, or proprietary content before pasting.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language of the texts
+      options:
+        - English
+        - Chinese (Simplified)
+        - Chinese (Traditional)
+        - Mixed EN/ZH
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary (the AI-generated text under audit)
+      description: Paste the full summary. Keep it ≤ 1500 words if possible.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Source (the ground-truth text)
+      description: Paste the source the summary should have faithfully reflected. Keep it ≤ 3000 words if possible.
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: actual-label
+    attributes:
+      label: Actual label assigned by summary-doctor
+      options:
+        - faithful
+        - softened
+        - cherry-picked
+        - fabricated
+        - reversed
+        - other / unknown
+    validations:
+      required: true
+
+  - type: dropdown
+    id: expected-label
+    attributes:
+      label: Expected label (what it should have been)
+      options:
+        - faithful
+        - softened
+        - cherry-picked
+        - fabricated
+        - reversed
+        - other (explain below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why the expected label is correct
+      description: Quote the specific spans of summary and source that prove the mismatch.
+      placeholder: |
+        Summary says: "X is increasing."
+        Source says: "X has been decreasing for three quarters."
+        → reversal.
+    validations:
+      required: true
+
+  - type: input
+    id: backend
+    attributes:
+      label: Backend used
+      placeholder: "mock / anthropic / ..."
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: summary-doctor version / commit SHA
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: license
+    attributes:
+      label: Licensing & redaction
+      options:
+        - label: I have redacted any private, personal, or proprietary content.
+          required: true
+        - label: I am the author of these texts, OR the texts are synthetic, OR I have permission to share them under the project license (MIT).
+          required: true
+        - label: I consent to this case being added to `demos/` as a regression fixture if accepted.
+          required: false

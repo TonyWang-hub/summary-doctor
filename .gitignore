@@ -21,3 +21,7 @@ summary-audit-*.md.json
 *.swp
 .vscode/
 .idea/
+
+# private launch materials — never commit
+docs/launch/
+*.cast

@@ -1,0 +1,104 @@
+name: Bug report
+description: Something is broken or behaves incorrectly.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in the fields below so the issue is reproducible.
+        If the bug is about a specific summary being judged incorrectly, please use the **Demo case** template instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: summary-doctor version
+      description: Output of `summary-doctor --version` (or commit SHA if running from source).
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend used
+      options:
+        - mock
+        - anthropic
+        - other (specify in details)
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary-text
+    attributes:
+      label: Summary text (the text being audited)
+      description: Paste the summary that was passed in. Redact any sensitive content.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: source-text
+    attributes:
+      label: Source text (the ground truth)
+      description: Paste the source the summary was checked against. Redact any sensitive content.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual label / output
+      description: What did the tool report?
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected label / output
+      description: What did you expect?
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Exact commands you ran.
+      render: bash
+      placeholder: |
+        summary-doctor run --summary s.txt --source src.txt --backend mock
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / stack trace
+      description: Paste any error output. Redact secrets.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirms
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I have removed any private, personal, or proprietary content from the pasted text.
+          required: true
+        - label: I searched existing issues and did not find a duplicate.
+          required: true

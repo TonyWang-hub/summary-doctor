@@ -28,8 +28,9 @@ dev = ["pytest>=7"]
 summary-doctor = "summary_doctor.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/"
-Issues = "https://github.com/"
+Homepage = "https://github.com/TonyWang-hub/summary-doctor"
+Issues = "https://github.com/TonyWang-hub/summary-doctor/issues"
+Discussions = "https://github.com/TonyWang-hub/summary-doctor/discussions"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
