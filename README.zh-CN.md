@@ -10,10 +10,8 @@
 [![PRs: welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#贡献)
 
 <p align="center">
-  <img src="docs/banner.svg" alt="summary-doctor：总结 + 原文 → 4 类标签（精确 / 弱化 / 反转 / 编造）+ 引证" width="820">
+  <img src="docs/demo.gif" alt="summary-doctor 跑完 9 个 demo（mock 模式）——正控停在 0% 偏差，反转 / 编造 demo 全部出警告标签" width="820">
 </p>
-
-> 30 秒演示 GIF 在 v0.1.1 上线；在那之前用上面的流水线示意图。
 
 公开演讲、访谈、文章的 LLM 自动总结正在社交平台上海量传播。在 LLM 忠实度（faithfulness）的相关研究和大量轶事样本里，**有相当一部分的"AI 总结"与原文存在偏差**——有时甚至直接反转演讲者的观点。
 

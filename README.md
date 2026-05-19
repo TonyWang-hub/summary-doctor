@@ -10,10 +10,8 @@ English | [简体中文](README.zh-CN.md)
 [![PRs: welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
 <p align="center">
-  <img src="docs/banner.svg" alt="summary-doctor: summary + source → 4-class labels (exact / softened / reversed / fabricated) with citations" width="820">
+  <img src="docs/demo.gif" alt="summary-doctor running across 9 demos in mock mode — positive controls land at 0% divergence, reversal/fabrication demos surface their warning labels" width="820">
 </p>
-
-> A 30-second demo GIF lands in v0.1.1 — until then the diagram above shows the pipeline.
 
 LLM-generated summaries of public talks, interviews, and articles are now mass-distributed on social platforms. Anecdotal evidence and a growing literature on LLM faithfulness suggest that **a non-trivial fraction of claims in such summaries can diverge from the source material** — sometimes outright reversing the speaker's position.
 
