@@ -52,6 +52,8 @@ HIGH_SIGNAL_DEMOS = [
     ("08-fabricated-stats-zh", 1, 30),
     ("10-quote-out-of-context-en", 1, 20),
     ("11-number-exaggeration-zh", 1, 30),
+    ("13-academic-peer-review-en", 1, 20),
+    ("14-legal-mata-style-en", 1, 20),
 ]
 
 POSITIVE_CONTROLS = [
@@ -156,9 +158,10 @@ def test_all_bundled_demos_have_required_files():
     """Sanity check: every demo dir contains the three expected files."""
     demos = sorted(p for p in DEMOS.iterdir() if p.is_dir())
     assert len(demos) >= 7, f"expected at least 7 demo directories; found {len(demos)}"
-    # As of v0.1 we ship 12 bundled demos (9 original + 3 new failure-mode demos).
-    # Soft check: if the count drops below 12, something likely got removed.
-    assert len(demos) >= 12, f"expected at least 12 bundled demos after v0.1 expansion; found {len(demos)}"
+    # As of v0.1 we ship 14 bundled demos (9 original + 3 mid-v0.1 failure-mode demos
+    # + 2 domain-application demos: academic peer review + legal sanctions order).
+    # Soft check: if the count drops below 14, something likely got removed.
+    assert len(demos) >= 14, f"expected at least 14 bundled demos after v0.1 expansion; found {len(demos)}"
     for d in demos:
         assert (d / "source.txt").exists(), f"missing source.txt in {d}"
         assert (d / "summary.txt").exists(), f"missing summary.txt in {d}"

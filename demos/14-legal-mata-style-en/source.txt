@@ -1,0 +1,24 @@
+In a 2023 sanctions order, a United States federal district court found
+that the attorneys of record for the plaintiff had submitted a brief that
+relied on six citations to judicial opinions which, on the court's
+inspection, did not exist in any legal reporter or docket. The court
+determined that the attorneys had generated the citations using a
+public AI chat tool and had failed to verify the cited cases against any
+authoritative legal database before filing.
+
+The order rejected the attorneys' argument that the failure was the
+fault of the AI tool. The court ruled that attorneys owe an independent
+duty of candor to the tribunal and may not delegate the verification of
+authority to a generative AI system. The court explicitly sanctioned the
+two attorneys and their firm, imposing a monetary penalty of five
+thousand dollars jointly and severally, ordering the attorneys to
+notify each judge falsely named in the fabricated opinions, and
+requiring the attorneys to complete an additional course of professional
+responsibility training before resuming representation.
+
+The opinion closed by stating that the sanction was not entered because
+of the use of an AI tool in itself, but because the attorneys
+abandoned the verification step that the rules of professional conduct
+require regardless of the drafting medium. The court declined to find
+bad-faith intent but found the conduct objectively unreasonable under
+Rule 11.

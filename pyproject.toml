@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "summary-doctor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Audit AI-generated summaries against their source material. Detect reversals, fabrications, and cherry-picking — with citations, not verdicts."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,10 +22,12 @@ classifiers = [
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.40"]
+mcp = ["mcp>=0.9.0"]
 dev = ["pytest>=7"]
 
 [project.scripts]
 summary-doctor = "summary_doctor.cli:main"
+summary-doctor-mcp = "summary_doctor.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/TonyWang-hub/summary-doctor"

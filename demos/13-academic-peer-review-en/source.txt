@@ -1,0 +1,21 @@
+A four-page literature review on peer-review feedback mechanisms reports
+the results of a 2024 controlled study with 142 participants drawn from a
+single mid-sized research institution. The authors found that targeted
+written feedback, delivered alongside a structured rubric, reduced
+peer-review turnaround time by 18 percent relative to free-form feedback,
+and that the reduction was statistically significant at the 0.01 level
+(Smith et al., 2024, Journal of Synthetic Reviews).
+
+The review further reports that this effect was confined to early-career
+researchers — defined in the source paper as reviewers within five years
+of their first independent appointment. Among senior reviewers in the
+same sample, the same combination of targeted feedback and structured
+rubric did not produce a statistically significant change in turnaround
+time, and the authors explicitly caution against generalizing the 18
+percent figure outside the early-career subgroup.
+
+The literature review closes by noting two boundary conditions that the
+original controlled study did not test: the effect was measured only in
+single-blind review tracks, and only for manuscripts under 8,000 words.
+The authors recommend replication before any policy recommendation is
+drawn from the 18 percent figure.

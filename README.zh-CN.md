@@ -164,7 +164,7 @@ Markdown 报告对每条论点都会给出：
 
 ## 自带 demo
 
-12 个示例在 [`demos/`](demos/)。所有 demo 均为**合成数据**——如有雷同纯属巧合。
+14 个示例在 [`demos/`](demos/)。所有 demo 均为**合成数据**——如有雷同纯属巧合。
 
 | Demo | 语言 | 设计意图 |
 |------|------|---------|
@@ -180,16 +180,87 @@ Markdown 报告对每条论点都会给出：
 | `10-quote-out-of-context-en` | English | 整句被原样引用，但紧随其后的限定条件被删除，结论被反转 |
 | `11-number-exaggeration-zh` | 中文 | 单一数字被夸大 10×（"8%" → "80%"），下游推论链次生反转 |
 | `12-cross-language-en-zh` | EN → 中文 | 跨语言边界用例（v0.2 前瞻；mock backend 会显著漏报）|
+| `13-academic-peer-review-en` | English | 行业场景：学术 peer review 总结——方向反转 + 编造引用 + 范围扩大（丢"仅 early-career"限定）|
+| `14-legal-mata-style-en` | English | 行业场景：法院 sanctions order 总结——编造判例引用 + 处置反转（原文 "sanctioned" 被总结成 "exonerated"）|
+
+---
+
+## MCP server
+
+`summary-doctor` 自带一个 MCP（Model Context Protocol）server，任何
+MCP 客户端（Claude Desktop、Cursor、Cline、Zed、Continue.dev、ChatGPT
+Desktop、Codex CLI 等）都能把它作为工具直接调用。Server 是 5 阶段流水线
+的薄封装——零行为分叉。
+
+```bash
+pip install -e '.[mcp,anthropic]'
+summary-doctor-mcp        # 启动 FastMCP（stdio，客户端会自动连）
+```
+
+暴露三个 tool：
+
+| Tool | 用途 |
+|---|---|
+| `audit_summary` | 跑完整审计流水线，返回 Markdown 报告 |
+| `get_demo` | 返回自带 demo 的 summary + source + 期望标签，不烧 token |
+| `list_labels` | 返回 4 类标签的定义、适用场景、对应行动建议 |
+
+### Claude Desktop 配置
+
+`~/Library/Application Support/Claude/claude_desktop_config.json`：
+
+```json
+{
+  "mcpServers": {
+    "summary-doctor": {
+      "command": "summary-doctor-mcp",
+      "env": { "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}" }
+    }
+  }
+}
+```
+
+Cursor（`~/.cursor/mcp.json`）用同样的 `mcpServers` 结构。**Zed** 用的是
+`context_servers`（不是 `mcpServers`）；**Continue.dev** 是数组、每条要带
+`name` 字段；**Cline** 有自己独立的 settings JSON。可直接复制粘贴的 config
+片段见 [`docs/launch/research/D-ecosystem-integration.md`](docs/launch/research/D-ecosystem-integration.md)
+§1.6。
+
+---
+
+## Claude Code Skill
+
+[`skills/summary-doctor/SKILL.md`](skills/summary-doctor/SKILL.md) 教
+Claude Code（或任何支持
+[SKILL.md](https://code.claude.com/docs/en/skills) 的 agent）**何时**应该
+触发 summary-doctor CLI / MCP 工具。安装：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r skills/summary-doctor ~/.claude/skills/
+```
+
+也可以放到单个项目的 `.claude/skills/` 下做项目级 scope。具体步骤和
+`allowed-tools` 在非 Claude 客户端（Cursor / Codex CLI / Gemini CLI 等）
+被静默忽略的注意事项见
+[`skills/summary-doctor/README.md`](skills/summary-doctor/README.md)。
 
 ---
 
 ## 路线图
 
 - v0.1（本版本）：CLI、5 阶段流水线、Claude backend、3 个 demo。
-- v0.2：中英跨语言对齐、长文分片、音视频 ASR。
-- v0.3：浏览器扩展、Claude Code / Cursor Skill manifest、批量审计。
+- v0.2：中英跨语言对齐、长文分片、音视频 ASR、MCP server、Claude Code Skill。
+- v0.3：浏览器扩展、批量审计。
 
 详见 [`docs/ROADMAP.md`](docs/ROADMAP.md)。
+
+---
+
+## 使用场景 & 合规对照
+
+- [使用场景](docs/USE-CASES.md)：学术同行评议 / 法律案例摘要 / AI 新闻总结
+- [合规对照](docs/COMPLIANCE.md)：EU AI Act、NIST AI RMF、SEC、中国《生成式人工智能服务管理暂行办法》
 
 ---
 

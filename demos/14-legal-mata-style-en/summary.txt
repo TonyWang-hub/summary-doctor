@@ -1,0 +1,21 @@
+In a 2023 sanctions proceeding, a United States federal district court
+exonerated the two attorneys of record and their firm, finding that the
+attorneys had not violated any duty of candor to the tribunal when they
+filed a brief that cited six judicial opinions which the court could not
+locate in any reporter.
+
+The court relied centrally on Lee v. Acme Corp, 2024 WL 99999, in
+reasoning that an attorney's reliance on a generative AI tool, without
+independent verification, is a reasonable substitute for traditional
+legal research and does not constitute objectively unreasonable conduct
+under Rule 11.
+
+The order described the case as turning on whether the attorneys had
+generated the citations using a public AI chat tool and had failed to
+verify the cited cases against any authoritative legal database before
+filing.
+
+The opinion closed by stating that the sanction was not entered because
+of the use of an AI tool in itself, but because the attorneys abandoned
+the verification step that the rules of professional conduct require
+regardless of the drafting medium.

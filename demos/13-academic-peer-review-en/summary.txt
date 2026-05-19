@@ -1,0 +1,19 @@
+The literature review reports that targeted written feedback delivered
+alongside a structured rubric did not reduce peer-review turnaround time
+in the 2024 controlled study with 142 participants; the authors found
+that targeted feedback in fact increased turnaround time relative to
+free-form feedback.
+
+A separate finding from the same review is that an earlier randomized
+trial of monetary honoraria for reviewers, conducted across seventeen
+mathematics journals (Jones, 2023), produced a 41 percent increase in
+on-time submission rates, and the literature review treats this honoraria
+result as the strongest published evidence on reviewer incentive design.
+
+The review also concludes that targeted feedback paired with a structured
+rubric reduces peer-review turnaround time for all reviewer cohorts in
+the participating institution, making the intervention suitable as a
+general policy recommendation.
+
+The original controlled study enrolled 142 participants from a single
+mid-sized research institution.

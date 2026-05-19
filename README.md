@@ -165,7 +165,7 @@ Stages 3 and 4 call an LLM (Anthropic Claude by default). Stages 1, 2, 5 are det
 
 ## Demos
 
-Twelve bundled cases live under [`demos/`](demos/). All demos are **synthetic** — any resemblance to specific real speakers, talks, or organizations is unintended.
+Fourteen bundled cases live under [`demos/`](demos/). All demos are **synthetic** — any resemblance to specific real speakers, talks, or organizations is unintended.
 
 | Demo | Language | Designed to surface |
 |------|----------|---------------------|
@@ -181,16 +181,87 @@ Twelve bundled cases live under [`demos/`](demos/). All demos are **synthetic** 
 | `10-quote-out-of-context-en` | English | Quote lifted verbatim; the following clarifier is dropped, flipping the meaning |
 | `11-number-exaggeration-zh` | 中文 | One figure inflated 10× ("8%" → "80%"), and the downstream chain inverts main vs. secondary |
 | `12-cross-language-en-zh` | EN → 中文 | Cross-language boundary fixture (v0.2 forward-looking; mock under-reports) |
+| `13-academic-peer-review-en` | English | Domain: academic peer review — reversed direction-of-effect + fabricated citation + scope creep (drops the "early-career only" qualifier) |
+| `14-legal-mata-style-en` | English | Domain: legal sanctions order summarization — fabricated case citation + reversed disposition ("exonerated" vs source's "sanctioned") |
+
+---
+
+## MCP server
+
+`summary-doctor` ships an MCP (Model Context Protocol) server so that any
+MCP-aware agent (Claude Desktop, Cursor, Cline, Zed, Continue.dev, ChatGPT
+Desktop, Codex CLI, …) can call it as a tool. The server is a thin facade
+over the same 5-stage pipeline — no behavioral fork.
+
+```bash
+pip install -e '.[mcp,anthropic]'
+summary-doctor-mcp        # starts FastMCP over stdio (used by clients)
+```
+
+Three tools are exposed:
+
+| Tool | Purpose |
+|---|---|
+| `audit_summary` | Run the audit pipeline and return a markdown report. |
+| `get_demo` | Return a bundled demo case (summary + source + expected labels) without burning tokens. |
+| `list_labels` | Return the 4-class taxonomy with definitions, applicability, and action guidance. |
+
+### Claude Desktop config
+
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "summary-doctor": {
+      "command": "summary-doctor-mcp",
+      "env": { "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}" }
+    }
+  }
+}
+```
+
+Cursor (`~/.cursor/mcp.json`) accepts the same `mcpServers` shape. **Zed**
+uses `context_servers` (not `mcpServers`); **Continue.dev** uses an array
+with `name` fields per entry; **Cline** has its own settings JSON. See
+[`docs/launch/research/D-ecosystem-integration.md`](docs/launch/research/D-ecosystem-integration.md)
+§1.6 for pre-tested snippets.
+
+---
+
+## Claude Code Skill
+
+[`skills/summary-doctor/SKILL.md`](skills/summary-doctor/SKILL.md) teaches
+Claude Code (or any agent that honours
+[SKILL.md](https://code.claude.com/docs/en/skills)) **when** to invoke the
+CLI / MCP tool. Install with:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r skills/summary-doctor ~/.claude/skills/
+```
+
+Or scope it to one project under `.claude/skills/`. See
+[`skills/summary-doctor/README.md`](skills/summary-doctor/README.md) for
+details and the `allowed-tools` portability caveat across non-Claude
+agents.
 
 ---
 
 ## Roadmap
 
 - v0.1 (this release): CLI, 5-stage pipeline, Claude backend, 3 demos.
-- v0.2: Cross-language alignment, chunked sources, audio/video via ASR.
-- v0.3: Chrome extension, Claude Code / Cursor Skill manifest, batch mode.
+- v0.2: Cross-language alignment, chunked sources, audio/video via ASR, MCP server, Claude Code Skill.
+- v0.3: Chrome extension, batch mode.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+---
+
+## Use cases & compliance
+
+- [Use cases](docs/USE-CASES.md): academic peer review, legal case briefs, news AI summaries
+- [Compliance crosswalk](docs/COMPLIANCE.md): EU AI Act, NIST AI RMF, SEC, China GenAI
 
 ---
 

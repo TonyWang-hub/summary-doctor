@@ -5,6 +5,77 @@ All notable changes to this project are documented in this file.
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-05-19
+
+Distribution layer + use-case & compliance docs. Decided after a three-route
+deep-research synthesis (commercial competitors / domain pain / ecosystem
+integration); the bet is that **distribution beats new features** at this
+stage and the moat is "0 direct competitors on the 4-label + citations
+form factor".
+
+### Added
+
+#### MCP server + Claude Code Skill (distribution layer)
+
+- `src/summary_doctor/mcp_server.py` — FastMCP wrapper exposing three tools
+  - `audit_summary(summary, source, lang, backend, model) -> markdown report`
+  - `get_demo(demo_name) -> {summary, source, readme, expected_labels}`
+  - `list_labels() -> dict` (the four-label taxonomy with usage hints)
+- `skills/summary-doctor/SKILL.md` (1.5 KB) — Claude Code Skill manifest with
+  positive + negative triggers; `skills/summary-doctor/README.md` covers
+  install paths (`~/.claude/skills/` global vs project-local `.claude/skills/`)
+- `pyproject.toml`: new `[project.optional-dependencies] mcp = ["mcp>=0.9.0"]`
+  and `[project.scripts] summary-doctor-mcp = "summary_doctor.mcp_server:main"`
+- README + zh-README: "MCP server" + "Claude Code Skill" sections with
+  Claude Desktop / Cursor / Zed / Continue.dev config snippets
+
+#### Two new demos (12 → 14)
+
+- `demos/13-academic-peer-review-en/` — synthetic literature-review case
+  surfacing fabricated citations + reversed findings + softened scope
+- `demos/14-legal-mata-style-en/` — synthetic federal-court sanctions order
+  case surfacing fabricated case citations + reversed holding
+
+Both demos are 100% synthetic content. Their `README.md` files link out to
+real public events (Stanford peer-review AI-modification study, Mata v.
+Avianca docket #54, ABA Formal Opinion 512, etc.) only as background.
+
+#### Public docs
+
+- `docs/USE-CASES.md` — three case studies (academic peer review / legal /
+  news) with ≥2 independent public sources per case + 4-label mappings +
+  CLI snippets + links to the matching demos
+- `docs/COMPLIANCE.md` — regulatory crosswalk: EU AI Act Articles 13 / 15 / 50,
+  NIST AI RMF MEASURE + MANAGE (with GenAI Profile NIST-AI-600-1
+  confabulation sub-item), SEC 2026 Examination Priorities, China
+  *Interim Measures* Articles 4 / 8 / 17 + GB/T 45654-2025 / 45674-2025
+- Disclaimer in COMPLIANCE.md states this is engineering reference, not
+  legal advice, and not a product claim
+
+### Changed
+
+- README first-screen banner reflects "14 demos" (was "9 demos")
+- Tests: 27 → 36 passing (+5 skipped when `mcp` package not installed) —
+  added MCP smoke tests and demo-13/14 high-signal invariants
+
+### Decisions deliberately deferred
+
+- Chrome extension → v0.4 (MV3 + Chrome Web Store review + Native Messaging
+  Host on Windows is a tarpit; bookmarklet + local daemon is the cheaper
+  alternative)
+- Compliance audit-report SaaS productisation → v0.3+ pending traction
+- Cross-language alignment → v0.2 included as a forward-looking demo only;
+  proper alignment lands in a later release
+
+### Known limits (rolled forward from v0.1)
+
+- Causal-direction inversion remains Haiku's weakest mode; recommend
+  `--model opus` (or claude-cli with opus) for cases where causal-flip is
+  in scope.
+- `claude-cli` backend Haiku occasionally emits invalid JSON on long
+  Chinese sources — opus first-try succeeds on those cases; documented in
+  `docs/EVALUATION.md`.
+
 ## [0.1.0] — 2026-05-19
 
 First public release.
@@ -90,4 +161,5 @@ All demo data is synthetic; any resemblance to specific real speakers, talks, or
 - `docs/launch/` (private promotion material) is `.gitignore`d.
 - The Claude CLI backend never logs the user's prompt or response text; all I/O is in-process.
 
+[0.2.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.0
 [0.1.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.1.0
