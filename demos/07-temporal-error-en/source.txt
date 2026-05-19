@@ -1,0 +1,24 @@
+The author opens with a brief technical history of a hypothetical
+distributed-storage protocol referred to throughout the chapter as PROTO-K.
+
+PROTO-K was first proposed in 2017 by an industry research lab as an
+internal alternative to existing consensus-based replication protocols.
+The original 2017 specification limited the protocol to fixed-membership
+clusters of at most seven nodes, and treated network partitions as a
+configuration error rather than as a recoverable runtime state.
+
+In 2019, an open-source reference implementation of PROTO-K was released
+under a permissive license. The 2019 release fixed two early specification
+ambiguities in leader election and clock-skew tolerance, but otherwise
+preserved the 2017 design constraints.
+
+The author notes that the version that most readers will recognize today is
+the 2022 redesign, often called PROTO-K v2. The 2022 redesign was the first
+revision to support dynamic membership and to treat partitions as a
+first-class recoverable state. The 2022 redesign also introduced the
+log-compaction scheme that is now the most cited feature of the protocol.
+
+The author is careful to label these dates as protocol-design milestones,
+not as adoption dates. Wide industry adoption did not begin until late
+2023, two years after the v2 redesign, when a major cloud vendor announced
+a managed offering.

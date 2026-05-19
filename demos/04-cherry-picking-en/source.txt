@@ -1,0 +1,30 @@
+In the panel debate on whether structured programming instruction should be
+introduced as a mandatory subject in primary school, the moderator opened by
+listing four findings that the panel had agreed on in advance.
+
+First, in three pilot districts that introduced a weekly one-hour coding block
+for ages 8 to 10, teachers reported a measurable lift in students' willingness
+to attempt multi-step problems in unrelated subjects. The effect size was small
+but consistent across all three districts.
+
+Second, the same pilot districts reported that students from households without
+a home computer fell further behind their peers on the in-class coding tasks
+within the first semester. The gap did not close by the end of the school year,
+and in one district it widened. The panel labeled this an equity warning that
+must be addressed before any wider rollout.
+
+Third, teacher preparation was identified as the dominant cost driver. Two of
+the three districts reported that without at least 40 hours of subject-specific
+teacher training, the coding block degraded into unsupervised screen time and
+produced no measurable benefit. One district that under-invested in training
+saw a net negative effect on math scores.
+
+Fourth, the panel was explicit that none of the pilot data supported a claim
+that early coding instruction improves long-term academic outcomes. The
+follow-up window was only one school year, and the panel cautioned against
+extrapolating from short-term enthusiasm to long-term skill formation.
+
+The moderator closed by stating that the panel's consensus was conditional
+support, not endorsement: a primary-school coding block can be defended only
+when the equity gap, the teacher-training cost, and the modest evidence base
+are all addressed in the rollout plan.

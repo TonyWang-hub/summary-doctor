@@ -50,6 +50,23 @@ pip install -e '.[anthropic]'     # 含 Anthropic SDK
 
 需要 Python 3.10+。
 
+### 复用 Claude Code 订阅（不需要 API key）
+
+如果你已经订阅 Claude Code，可以直接复用订阅的鉴权和额度，无需单独申请
+Anthropic API key。先确认 `claude --version` 在终端能跑通，然后：
+
+```bash
+summary-doctor demos/02-softening-zh/summary.txt \
+  --original demos/02-softening-zh/source.txt \
+  --lang zh \
+  --backend claude-cli \
+  --model haiku
+```
+
+底层走 `claude -p` 命令行调用。每次审计的边际成本归到你订阅的常规用量里，
+不会单独走 API 计费。难判断的 reversed / softened 边界场景可以换
+`--model opus` 提精度。
+
 ---
 
 ## 30 秒上手
@@ -115,6 +132,20 @@ Markdown 报告对每条论点都会给出：
 
 ---
 
+## Mock vs Anthropic — 怎么选？
+
+| 使用场景 | Backend | 理由 |
+|---|---|---|
+| CI 冒烟测试 | `mock` | 无需 API key，结果稳定 |
+| 个人快速检查 | `mock` | 离线、免费 |
+| 发布前对比总结 | `anthropic` Haiku 4.5 | 廉价的校准检测 |
+| 反转 / 弱化的边界判断 | `anthropic` Opus 4.7 | 精度最高 |
+| 多语言原文 | `anthropic`（任一） | mock 没有跨语言对齐 |
+
+两种 backend 在自带 demo 上的精度对比见 [`docs/EVALUATION.md`](docs/EVALUATION.md)；Anthropic 模式的 prompt 设计见 [`docs/PROMPT-ENGINEERING.md`](docs/PROMPT-ENGINEERING.md)。
+
+---
+
 ## 工作原理（5 阶段流水线）
 
 ```
@@ -133,9 +164,15 @@ Markdown 报告对每条论点都会给出：
 
 | Demo | 语言 | 设计意图 |
 |------|------|---------|
-| `01-reversal-en` | English | 反转论点 + 编造论点（GPU 瓶颈那条） |
+| `01-reversal-en` | English | 反转论点 + 编造论点（GPU supply 烟雾弹）|
 | `02-softening-zh` | 中文 | 弱化限定词 + 一条反转 |
 | `03-faithful-en` | English | 正控——应该绝大多数是 `exact` |
+| `04-cherry-picking-en` | English | 选择性引用——丢限定词导致弱化 |
+| `05-causal-inversion-zh` | 中文 | 因果倒置（X→Y 说成 Y→X）|
+| `06-scope-creep-en` | English | 范围扩大——窄结论说成普遍规律 |
+| `07-temporal-error-en` | English | 年份 / 日期被编造 |
+| `08-fabricated-stats-zh` | 中文 | 数字统计凭空捏造 |
+| `09-faithful-zh` | 中文 | 中文正控——demo 3 的镜像 |
 
 ---
 

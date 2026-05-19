@@ -1,0 +1,28 @@
+In a twelve-week dietary intervention trial, researchers studied the effect of
+substituting a daily serving of refined-grain breakfast with a fermented
+whole-grain breakfast product. The trial enrolled 240 adults aged 55 to 70
+with diagnosed pre-diabetes and a body-mass index between 27 and 32.
+
+In this enrolled population and under the prescribed daily serving size,
+the researchers observed a modest but statistically significant reduction in
+fasting glucose at week 12 compared to the control arm. The effect was
+specific to the pre-diabetic, overweight, older adult subgroup. The
+researchers also reported that within the trial population, the fermented
+whole-grain product did not cause any clinically significant gastrointestinal
+adverse events.
+
+The researchers were explicit on three boundaries of the finding. First, the
+trial did not enroll adults under 55, did not enroll normo-glycemic adults,
+and did not enroll adults outside the 27 to 32 BMI band — the result cannot
+be extended to general healthy adults, to children, or to adults with severe
+obesity. Second, the trial used a single fermented whole-grain product from
+one supplier — the result cannot be extended to fermented whole-grain
+products in general, because fermentation strain, fiber content, and
+post-fermentation processing all vary substantially across the category.
+Third, the trial measured a surrogate biomarker (fasting glucose), not a
+clinical endpoint such as progression to type 2 diabetes — the finding
+should not be reported as a diabetes-prevention claim.
+
+The researchers concluded that the result, properly scoped, is encouraging
+enough to motivate a larger, longer, multi-product replication trial, but
+that it is not sufficient evidence for population-level dietary guidance.

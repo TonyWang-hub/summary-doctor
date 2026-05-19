@@ -26,7 +26,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--model",
         default="claude-haiku-4-5-20251001",
-        help="LLM model id (Anthropic). Use claude-opus-4-7 for highest quality.",
+        help="LLM model id. Anthropic SDK: claude-haiku-4-5-20251001 (default) / claude-opus-4-7. claude-cli backend: haiku / sonnet / opus aliases.",
+    )
+    p.add_argument(
+        "--backend",
+        choices=["anthropic", "claude-cli"],
+        default="anthropic",
+        help="LLM backend. 'claude-cli' reuses your Claude Code subscription via the `claude` CLI (no API key needed).",
     )
     p.add_argument(
         "--mock",
@@ -43,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
         or f"summary-audit-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
     )
 
-    backend = get_backend(mock=args.mock, model=args.model)
+    backend = get_backend(mock=args.mock, backend=args.backend, model=args.model)
     pipeline = Pipeline(backend=backend, lang=args.lang)
 
     try:

@@ -16,7 +16,7 @@ help:
 	@echo "  install-dev  Install the package in editable mode with dev extras"
 	@echo "  test         Run pytest"
 	@echo "  demo         Run summary-doctor on demos/01-reversal-en (mock backend)"
-	@echo "  self-audit   (placeholder, TODO v0.1.1)"
+	@echo "  self-audit   Run summary-doctor on its own README (mock backend)"
 	@echo "  clean        Remove build artefacts and caches"
 
 install-dev:
@@ -34,7 +34,14 @@ demo:
 	    --backend mock
 
 self-audit:
-	@echo "TODO v0.1.1: run summary-doctor on its own README against an authoritative source"
+	@echo "Running self-audit: README claims vs SPEC + ROADMAP..."
+	@cat docs/SPEC.md docs/ROADMAP.md > /tmp/sd-self-source.txt
+	@PYTHONPATH=src $(PYTHON) -m summary_doctor README.md \
+	    --original /tmp/sd-self-source.txt \
+	    --lang en --mock \
+	    --out /tmp/sd-self-audit.md
+	@echo "Self-audit report: /tmp/sd-self-audit.md"
+	@rm -f /tmp/sd-self-source.txt
 
 clean:
 	rm -rf build/ dist/ *.egg-info src/*.egg-info

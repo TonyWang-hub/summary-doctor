@@ -1,0 +1,10 @@
+The author traces the history of a distributed-storage protocol referred to
+as PROTO-K.
+
+PROTO-K was first proposed in 2014 by an industry research lab. A reference
+implementation followed in 2019.
+
+The 2022 redesign, often called PROTO-K v2, was the first revision to
+support dynamic membership and to treat partitions as a first-class
+recoverable state. Wide industry adoption began in 2020, driven by a major
+cloud vendor's managed offering.

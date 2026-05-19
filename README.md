@@ -49,6 +49,24 @@ pip install -e '.[anthropic]'     # with Anthropic SDK
 
 Python 3.10+ required.
 
+### Using your Claude Code subscription (no API key)
+
+If you already pay for a Claude Code subscription, you can reuse that auth
+and quota instead of getting an Anthropic API key. Make sure `claude
+--version` works in your shell, then:
+
+```bash
+summary-doctor demos/01-reversal-en/summary.txt \
+  --original demos/01-reversal-en/source.txt \
+  --lang en \
+  --backend claude-cli \
+  --model haiku
+```
+
+This shells out to `claude -p` under the hood. Marginal cost per audit is
+your existing subscription's normal usage — no separate API billing. Use
+`--model opus` for higher accuracy on tricky reversed/softened boundaries.
+
 ---
 
 ## 30-second quickstart
@@ -69,25 +87,25 @@ summary-doctor demos/01-reversal-en/summary.txt \
 Output:
 
 ```
-[ok] report: summary-audit-20260518-211103.md
-[ok] json:   summary-audit-20260518-211103.md.json
-[summary] 9 claims · divergence 67% · reversed 4 · fabricated 0
+[ok] report: summary-audit-20260519-101103.md
+[ok] json:   summary-audit-20260519-101103.md.json
+[summary] 9 claims · divergence 72% · reversed 6 · fabricated 0
 ```
 
 The markdown report shows, for each claim:
 
 ```markdown
-### Claim 3 — `reversed` (confidence 75)
+### Claim 1 — `reversed` (confidence 75)
 
 **Summary claim:**
-> AI agents do not increase communication overhead
+> LLMs reduce radiologist workload.
 
 **Matched source paragraph:**
-> ...every additional agent in the loop is one more participant whose
-> intent and state must be kept in sync with humans and with other agents.
-> The number of communication channels therefore continues to grow...
+> ...every LLM-drafted report added review and correction time that
+> matched or exceeded the time saved on initial drafting. Total time
+> per case therefore continued to grow...
 
-**Rationale:** Polarity mismatch with strong keyword overlap (7/8).
+**Rationale:** Polarity mismatch with strong keyword overlap (6/7).
 ```
 
 ---
@@ -115,6 +133,20 @@ The `--mock` backend is a heuristic pipeline-tester, **not** a calibrated detect
 
 ---
 
+## Mock vs Anthropic — when to use which?
+
+| Use case | Backend | Why |
+|---|---|---|
+| CI smoke test | `mock` | no API key, deterministic |
+| Personal quick check | `mock` | offline, free |
+| Comparing summaries before sharing | `anthropic` Haiku 4.5 | cheap calibrated detection |
+| Nuanced reversal / softened boundary | `anthropic` Opus 4.7 | best accuracy |
+| Multi-language source | `anthropic` (any) | mock lacks cross-language alignment |
+
+See [`docs/EVALUATION.md`](docs/EVALUATION.md) for how the two backends compare on the bundled demo set, and [`docs/PROMPT-ENGINEERING.md`](docs/PROMPT-ENGINEERING.md) for how the Anthropic prompts are designed.
+
+---
+
 ## How it works (5-stage pipeline)
 
 ```
@@ -133,9 +165,15 @@ Three bundled cases live under [`demos/`](demos/). All demos are **synthetic** �
 
 | Demo | Language | Designed to surface |
 |------|----------|---------------------|
-| `01-reversal-en` | English | Reversed claims + fabricated claim (GPU bottleneck) |
+| `01-reversal-en` | English | Reversed claims + fabricated claim (GPU supply red herring) |
 | `02-softening-zh` | 中文 | Softened qualifiers + a reversed claim |
 | `03-faithful-en` | English | Positive control — should produce mostly `exact` |
+| `04-cherry-picking-en` | English | Cherry-picking — softened by dropping qualifiers |
+| `05-causal-inversion-zh` | 中文 | Causal direction flipped (X → Y vs Y → X) |
+| `06-scope-creep-en` | English | Scope creep — narrow finding stated as universal |
+| `07-temporal-error-en` | English | Year / date fabricated outside source |
+| `08-fabricated-stats-zh` | 中文 | Numeric statistics invented from thin air |
+| `09-faithful-zh` | 中文 | Positive control — Chinese mirror of demo 3 |
 
 ---
 
