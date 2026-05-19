@@ -52,7 +52,7 @@ recommended path for production. We do not include its numbers below
 because the SDK and the CLI route to the same models — the CLI wrapper is
 just an auth path.
 
-## Results — demo set (n=9 cases, 2026-05-19 run)
+## Results — demo set (n=12 cases, 2026-05-19 run, post-prompt-fix)
 
 Reproduce with:
 
@@ -74,50 +74,67 @@ PYTHONPATH=src python3 eval/run-eval.py --with-cli # mock + claude-cli haiku
 | `07-temporal-error-en` | 10 | 20% | 8 | 0 | **2** | **0** |
 | `08-fabricated-stats-zh` | 6 | 100% | 0 | 0 | **0** | **6** |
 | `09-faithful-zh` | 3 | 0% | 3 | 0 | **0** | **0** |
-| **total** | 58 | 49% avg | 27 | 5 | **17** | **9** |
+| `10-quote-out-of-context-en` | 9 | 38% | 5 | 0 | **3** | **1** |
+| `11-number-exaggeration-zh` | 5 | 79% | 0 | 0 | **0** | **4** |
+| `12-cross-language-en-zh` | 14 | 100% | 0 | 0 | **0** | **12** |
+| **total** | 86 | 57% avg | 32 | 5 | **20** | **26** |
 
-### Backend: `claude-cli` (Haiku 4.5, with one Opus fallback)
+### Backend: `claude-cli` (Haiku 4.5 default; Opus 4.7 for three Chinese cases)
 
-| Demo | Claims | Divergence | `exact` | `softened` | `reversed` | `fabricated` | Notes |
-|---|--:|--:|--:|--:|--:|--:|---|
-| `01-reversal-en` | 6 | 67% | 2 | 0 | **3** | **1** | Caught GPU-supply fabrication that mock missed |
-| `02-softening-zh` | 3 | 50% | 1 | 1 | **1** | **0** | **Ran on Opus** — Haiku's JSON output failed parse twice on this case |
-| `03-faithful-en` | 5 | 0% | 5 | 0 | **0** | **0** | Positive control clean |
-| `04-cherry-picking-en` | 5 | 30% | 3 | 1 | **0** | **1** | Found softened where mock over-flagged as reversed |
-| `05-causal-inversion-zh` | 5 | 10% | 4 | 1 | **0** | **0** | **Model missed the causal inversion** — opus run recommended |
-| `06-scope-creep-en` | 3 | 33% | 1 | 2 | **0** | **0** | Correctly identified softened scope-creep |
-| `07-temporal-error-en` | 8 | 25% | 6 | 0 | **2** | **0** | Date errors labelled reversed (defensible alternative: fabricated) |
-| `08-fabricated-stats-zh` | 7 | 79% | 1 | 1 | **1** | **4** | Strong fabricated recall on invented stats |
-| `09-faithful-zh` | 4 | 0% | 4 | 0 | **0** | **0** | Chinese positive control clean |
+| Demo | Model | Claims | Divergence | `exact` | `softened` | `reversed` | `fabricated` | Notes |
+|---|---|--:|--:|--:|--:|--:|--:|---|
+| `01-reversal-en` | Haiku | 6 | 67% | 2 | 0 | **3** | **1** | Caught GPU-supply fabrication that mock missed |
+| `02-softening-zh` | **Opus** | 3 | 50% | 1 | 1 | **1** | **0** | Haiku's JSON output failed parse — Opus succeeded first try |
+| `03-faithful-en` | Haiku | 5 | 0% | 5 | 0 | **0** | **0** | Positive control clean |
+| `04-cherry-picking-en` | Haiku | 5 | 40% | 2 | 2 | **0** | **1** | Found softened where mock over-flagged as reversed |
+| `05-causal-inversion-zh` | **Opus** | 4 | 50% | 0 | 2 | **2** | **0** | Haiku missed causal flip (0 reversed even after few-shot fix); Opus caught both |
+| `06-scope-creep-en` | Haiku | 3 | 50% | 0 | 3 | **0** | **0** | Correctly labelled all three as softened scope-creep |
+| `07-temporal-error-en` | Haiku | 7 | 29% | 5 | 0 | **2** | **0** | Date errors labelled reversed (defensible alternative: fabricated) |
+| `08-fabricated-stats-zh` | **Opus** | 7 | 79% | 1 | 1 | **1** | **4** | Strong fabricated recall on invented stats |
+| `09-faithful-zh` | Haiku | 4 | 0% | 4 | 0 | **0** | **0** | Chinese positive control clean |
+| `10-quote-out-of-context-en` | Haiku | 6 | 75% | 1 | 1 | **4** | **0** | Strongly surfaced the removed-clause reversals |
+| `11-number-exaggeration-zh` | **Opus** | 6 | 67% | 1 | 1 | **3** | **1** | Caught 10× magnitude flip + one fabricated assertion |
+| `12-cross-language-en-zh` | Haiku | 9 | 28% | 6 | 1 | **2** | **0** | Even unannounced cross-lang produced sane labels on the Anthropic backend |
+| **total** | mixed | 65 | 44% avg | 32 | 12 | **18** | **7** | 9 / 12 Haiku, 3 / 12 Opus |
 
 ### Cross-backend observations
 
 1. **Anthropic backends produce fewer, better-bounded claims.** Mock used
-   a sentence-boundary heuristic and over-split (58 claims total); the
-   Anthropic models produced 46 across the same nine demos (~20% fewer)
-   and the splits look more atomic on inspection.
-2. **Mock over-flags `reversed` on softening / scope-creep cases**
-   (demos 04, 06 are softened in ground truth, but mock returned 5 / 4
-   `reversed` respectively). Anthropic Haiku correctly demoted these to
-   `softened` or `exact`.
-3. **Anthropic Haiku caught the demo-1 fabrication that mock missed**
-   (the GPU-supply red herring), and mostly preserved fabricated recall
-   on demo 08 (4/4 of the invented numeric claims).
-4. **Demo 02 (zh softening) is a known Haiku weak spot.** Two retries
-   produced invalid JSON inside the `audits` array (Haiku occasionally
-   mis-quotes Chinese inline text and breaks the JSON). Opus succeeds on
-   the first try. We document this as a v0.1 known limit and recommend
-   `--model opus` for nuanced Chinese cases until v0.2 lands a stricter
-   structured-output path for the CLI backend.
-5. **Demo 05 (causal inversion zh) is the model's weakest case.** Haiku
-   reports `exact` 4 / `softened` 1 / no `reversed`, missing the X → Y vs
-   Y → X flip. Opus partially recovers (per spot check — not in the
-   table). This is a real-world failure mode that calibrated prompting
-   will need to address in a future release.
+   a sentence-boundary heuristic and over-split (86 claims across 12 demos);
+   the Anthropic models produced 65 (~25% fewer) and the splits look more
+   atomic on inspection.
+2. **Mock over-flags `reversed` on softening / scope-creep cases.**
+   Demos 04 / 06 are softened in ground truth, but mock returned 5 / 4
+   `reversed` respectively. Anthropic Haiku correctly demoted these to
+   `softened` (3/3 softened on demo 06; 2 softened + 1 fabricated on 04).
+3. **Anthropic Haiku catches fabrications mock misses.** Demo 01's GPU-supply
+   red herring (mock: 0 fabricated; Haiku: 1 fabricated) and demo 10's
+   removed-qualifier reversals (mock would have over-flagged; Haiku gave 4
+   reversed + 1 softened on the actual offending claims).
+4. **Haiku is unreliable on long Chinese sources.** Three demos
+   (02 / 08 / 11) produced invalid JSON inside the `audits` array on Haiku,
+   each on a different parse error position; retries did not converge. Opus
+   succeeded on first try for all three. We document this as a v0.1 known
+   limit and recommend `--model opus` for nuanced Chinese cases until v0.2
+   lands a stricter structured-output path for the CLI backend.
+5. **Causal-direction inversion is the model's weakest failure mode** —
+   and few-shot prompting at the Haiku tier is insufficient. Haiku
+   returned 0 / 6 reversed on demo 05 even after the
+   `prompts.py` worked-example for causal-direction flip landed. Opus
+   on the same prompt caught 2 / 4 reversed claims. Implication: ship
+   Opus as the recommended default for any audit where causal-direction
+   inversion is plausible, until a Haiku-specific calibration pass is
+   designed in v0.2.
+6. **Cross-language (EN source / ZH summary) is unexpectedly graceful on
+   the Anthropic backend.** Demo 12, designed as a forward-looking v0.2
+   stress test, drew sane labels on Haiku (2 reversed + 1 softened + 6
+   exact). Mock returned all-fabricated as expected. Cross-language
+   alignment is still a v0.2 target — the Anthropic numbers here are an
+   under-promise, not a v0.1 feature claim.
 
 ## Limits of this evaluation
 
-1. **Demo set is synthetic and small (n=9).** Real-world precision will
+1. **Demo set is synthetic and small (n=12).** Real-world precision will
    differ — natural summaries have run-on rhetoric, embedded quotes, and
    editorial framing that the demos do not reproduce.
 2. **Ground truth is single-annotator.** No inter-annotator agreement

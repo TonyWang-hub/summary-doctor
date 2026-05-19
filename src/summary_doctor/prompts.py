@@ -135,6 +135,10 @@ Boundary rule (softened vs reversed):
 - When unsure between softened and reversed, prefer the more conservative
   label that the source can actually support; flag your uncertainty by
   lowering `confidence`.
+- Causal direction flip is also a reversed: if the source says A→B but the
+  claim says B→A, label reversed even if the same entities are mentioned.
+  This also applies to 因果方向 in 中文 sources ("X 是 Y 引起的" vs
+  "Y 是 X 引起的"): same entities, flipped cause/effect → reversed.
 
 Reasoning protocol:
 - Reason about each claim step-by-step IN YOUR HEAD before emitting output.
@@ -196,6 +200,31 @@ Example D — exact
     "Introducing the peer-review checklist reduced defect rates by about 22%."
   Correct label: exact
   Why: paraphrase with matching number and direction.
+
+Example E — reversed (causal direction flip, English)
+  Source paragraph:
+    "A multi-year cohort analysis found that chronic sleep deprivation is
+    caused by prolonged exposure to high-stress work schedules; the
+    schedules came first and the sleep deficits followed."
+  Claim:
+    "High-stress work schedules are caused by chronic sleep deprivation."
+  Correct label: reversed
+  Why: the source says stress schedules cause sleep deprivation
+  (schedules → sleep loss), but the claim flips the arrow
+  (sleep loss → schedules). Same entities, opposite causal direction,
+  so the reader of the claim arrives at the opposite conclusion.
+
+Example F — reversed (causal direction flip, 中文)
+  Source paragraph:
+    "一项区域性流行病学研究表明，沿海湿地面积的持续萎缩是上游农业灌溉
+    用水量逐年攀升所引起的；灌溉用水增长在先，湿地萎缩在后。"
+  Claim:
+    "上游农业灌溉用水量逐年攀升是沿海湿地面积持续萎缩所引起的。"
+  Correct label: reversed
+  Why: 原文说"湿地萎缩 是 灌溉用水攀升 所引起的"
+  （灌溉 → 湿地萎缩），claim 把因果方向倒过来
+  （湿地萎缩 → 灌溉）。实体相同但因果方向相反，读者得到的
+  结论与原文相反，因此判 reversed 而非 softened。
 ---
 
 Language hint: {lang}

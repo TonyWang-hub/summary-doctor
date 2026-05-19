@@ -28,29 +28,53 @@ document that overlaps with the spec by design. Expect a high `exact`
 count and a non-trivial `fabricated` count for README sentences that talk
 about install / contributing / license (things the spec does not mention).
 
-## How to run it
+## Status
+
+| Version | Self-audit |
+|---|---|
+| v0.1 | shipped — three `make` targets (mock / claude-cli haiku / claude-cli opus) |
+| v0.1.1 (planned) | tighten the source set (include CONTRIBUTING.md, MOCK-LIMITS.md), and optionally allow an `anthropic`-SDK backend when a secret is configured |
+| v0.2 (planned) | extend to audit `README.zh-CN.md` against the same source |
+
+## How to run
+
+Three Make targets are provided so the cost / fidelity trade-off is
+explicit at the command line:
 
 ```bash
+# Heuristic mock backend — no auth, no API spend, runs in seconds.
+# Good for CI smoke tests and "does the pipeline still wire up?" checks.
+make self-audit-mock
+
+# Default. Uses the `claude` CLI with the haiku alias, so it reuses your
+# Claude Code subscription auth instead of an API key. Seconds to a minute.
 make self-audit
+
+# Same path, but opus instead of haiku. Slower, more accurate on the
+# softened / reversed boundary. Use when you want to triage divergence,
+# not when you just want a smoke test.
+make self-audit-opus
 ```
 
-What the target does:
+Output paths:
 
-1. Concatenate `docs/SPEC.md` and `docs/ROADMAP.md` into a temp file.
-2. Run summary-doctor over `README.md` against that temp file in `--mock`
-   mode and English-language hint.
-3. Write the report to `/tmp/sd-self-audit.md` (plus a JSON sidecar).
-4. Clean up the temp source file.
+| Target              | Output                                          |
+|---------------------|-------------------------------------------------|
+| `self-audit-mock`   | `/tmp/sd-self-audit-mock.md` (overwritten)      |
+| `self-audit`        | `eval/self-audit/<timestamp>-haiku.md`          |
+| `self-audit-opus`   | `eval/self-audit/<timestamp>-opus.md`           |
 
-No API key is required; the `--mock` backend is used so the target stays
-runnable in CI without secrets. The trade-off is that the labels are the
-heuristic mock labels, not calibrated detector output. See
-[`MOCK-LIMITS.md`](MOCK-LIMITS.md) for what the mock backend can and
-cannot tell you.
+The `claude-cli` targets write timestamped files into `eval/self-audit/`
+(gitignored) so you can diff successive runs and see whether a change to
+README or SPEC moved the divergence number. Mock runs stay in `/tmp/`
+because the heuristic output is not worth diffing.
+
+If `claude` is not on the PATH, `make self-audit` fails fast with a
+pointer back to this doc. `make self-audit-mock` does not need it.
 
 ## Reading the report
 
-The report at `/tmp/sd-self-audit.md` will contain:
+The report contains:
 
 - A header with the model name, language hint, claim count, and
   divergence percentage.
@@ -58,36 +82,65 @@ The report at `/tmp/sd-self-audit.md` will contain:
 - A per-claim block with the matched paragraph (or "no match") and a
   one-line rationale.
 
-You are looking for two things:
+Two notes on what the numbers mean here, **specifically because the input
+is a README rather than a third-party AI summary**:
 
-1. **The pipeline ran to completion.** No exceptions, no empty report.
-2. **The label distribution is plausible.** Some `exact` (the README does
-   echo the spec), some `fabricated` (the README has install / license /
-   contributing sections the spec does not), and `reversed` should be
-   relatively rare — if it spikes, that is a signal the README has drifted
-   from the spec and is worth a manual look.
+1. **Mock on README routinely reports ~60% divergence.** That is expected,
+   not a bug. The mock backend is a keyword-overlap-plus-polarity
+   heuristic tuned for synthetic summary/source pairs. The README has
+   large sections (install, license, contributing) the SPEC does not
+   mention, so the mock backend labels them `fabricated`. Likewise, the
+   README's "what it is not" section reads as polarity inversion of the
+   spec's "what it is" section, which trips the `reversed` heuristic.
+   Both are artefacts of using the mock backend on the wrong shape of
+   input. Use `make self-audit` (claude-cli) for a label distribution
+   that is meaningful to act on.
+2. **`reversed` spikes are the signal to look at.** Even on the
+   claude-cli backend, the absolute divergence number on a self-audit is
+   not a quality target — the README and SPEC overlap by design. What is
+   useful is *change* across runs: a `reversed` count that suddenly
+   jumps after a README rewrite is worth a manual look at the diff.
 
-## Status
+## Known limits (also of the real-backend run)
 
-| Version | Self-audit |
-|---|---|
-| v0.1 | runnable via `make self-audit`, mock backend only |
-| v0.1.1 (planned) | wire into CI; optionally allow `--backend anthropic` when a secret is configured |
-| v0.2 (planned) | extend to audit `README.zh-CN.md` against the same source |
-
-## Limits of self-audit
-
-1. **README ≠ AI summary.** The intended input is a third-party AI summary
-   of a source. The README is hand-written and shares the same authors as
-   the spec. Calibration numbers from self-audit do not generalise.
-2. **Mock backend only (today).** Labels are heuristic. A real LLM run
-   would produce different (and probably more useful) labels — but is
-   gated on having an API key in CI.
-3. **One-sided source.** SPEC + ROADMAP are not the only authoritative
+1. **README ≠ AI summary.** The intended input is a third-party AI
+   summary of a source. The README is hand-written and shares the same
+   authors as the spec. Calibration numbers from self-audit do not
+   generalise to real audits and should not be quoted as such.
+2. **One-sided source.** SPEC + ROADMAP are not the only authoritative
    documents in the repo (CONTRIBUTING.md, MOCK-LIMITS.md, this file all
-   contribute). A future iteration may concatenate the entire `docs/`
-   directory as the source.
-4. **No assertions on the output.** The current target produces a report
-   but does not fail the build on any specific divergence threshold. That
-   is intentional for v0.1.1 — once the numbers stabilise we can add
-   sanity gates (e.g. "fail if `reversed` count > 10% of claims").
+   contribute). README claims about contributing or about mock limits
+   will look `fabricated` against the SPEC + ROADMAP slice. A future
+   iteration may concatenate more of `docs/` as the source.
+3. **Real-backend false positives.** Even with `--backend claude-cli`,
+   the README is not a single-claim-per-line summary — it has prose,
+   code blocks, a roadmap table, and badges. The decomposition stage
+   will sometimes promote a code-block fragment or a table cell to a
+   "claim", and those will look `fabricated` against the spec because
+   the spec does not duplicate the README's UX prose. Treat individual
+   claim labels as suggestions to read the matched paragraph, not as
+   ground truth.
+4. **No assertions on the output.** None of the self-audit targets fail
+   the build on a divergence threshold. That is intentional in v0.1 —
+   once the numbers stabilise we can add sanity gates (e.g. "fail if
+   `reversed` count > 10% of claims on the claude-cli run").
+
+## Will it ever be a CI step?
+
+Not today. Two reasons:
+
+1. **Auth.** The default target shells out to the `claude` CLI, which
+   requires interactive Claude Code subscription auth. CI runners do not
+   have that auth, and using a real API key in CI raises a secret-handling
+   bar this project has not crossed yet.
+2. **No threshold.** Until the divergence numbers stabilise across runs,
+   "fail the build on X" is arbitrary. CI gating without a calibrated
+   threshold creates flaky red runs and trains contributors to ignore the
+   signal.
+
+A reasonable v0.1.1 path: keep `make self-audit-mock` runnable in CI as a
+zero-cost smoke test (does the pipeline still wire up end-to-end?), and
+treat `make self-audit` / `make self-audit-opus` as developer-local
+commands invoked before tagging a release. If the project later opts into
+an `anthropic`-SDK CI run, it should be a separate workflow guarded by a
+repository secret and skipped on forks.

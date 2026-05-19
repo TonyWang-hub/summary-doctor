@@ -50,11 +50,23 @@ HIGH_SIGNAL_DEMOS = [
     ("06-scope-creep-en", 1, 20),
     ("07-temporal-error-en", 1, 10),
     ("08-fabricated-stats-zh", 1, 30),
+    ("10-quote-out-of-context-en", 1, 20),
+    ("11-number-exaggeration-zh", 1, 30),
 ]
 
 POSITIVE_CONTROLS = [
     ("03-faithful-en", 10),
     ("09-faithful-zh", 10),
+]
+
+# --- cross-language demos ----------------------------------------------------
+# v0.1 mock backend has no cross-language lexicon. We only assert that the
+# pipeline does not crash and surfaces at least one high-signal label —
+# divergence floor is 0 because the mock backend will likely mark *every*
+# claim as fabricated for lack of token overlap, which is itself the v0.1
+# limitation the demo is documenting.
+CROSS_LANG_DEMOS = [
+    ("12-cross-language-en-zh", 1, 0),
 ]
 
 
@@ -85,6 +97,28 @@ def test_positive_control_stays_clean(demo, max_div):
     assert result["divergence"] <= max_div, (
         f"{demo} (positive control): divergence should be ≤{max_div}, got {result['divergence']}; "
         f"labels={labels}"
+    )
+
+
+@pytest.mark.parametrize("demo,min_high,min_div", CROSS_LANG_DEMOS)
+def test_cross_lang_demo_does_not_crash(demo, min_high, min_div):
+    """Cross-language input must not crash the pipeline.
+
+    Mock backend lacks cross-language alignment (v0.2 roadmap), so we only
+    assert that (a) the pipeline runs end-to-end without raising, (b) at
+    least one high-signal label surfaces, and (c) divergence meets the
+    (often trivial) floor. The point of this test is to lock the boundary,
+    not to claim cross-language audit quality on the mock path.
+    """
+    result = _run(demo)
+    labels = result["labels"]
+    assert len(labels) > 0, f"{demo}: pipeline produced zero claims; cross-language input may have been dropped"
+    high_signal = sum(1 for label in labels if label in ("reversed", "fabricated"))
+    assert high_signal >= min_high, (
+        f"{demo}: cross-language demo should still surface ≥{min_high} high-signal label(s); got {labels}"
+    )
+    assert result["divergence"] >= min_div, (
+        f"{demo}: divergence should be ≥{min_div}, got {result['divergence']}; labels={labels}"
     )
 
 
@@ -122,6 +156,9 @@ def test_all_bundled_demos_have_required_files():
     """Sanity check: every demo dir contains the three expected files."""
     demos = sorted(p for p in DEMOS.iterdir() if p.is_dir())
     assert len(demos) >= 7, f"expected at least 7 demo directories; found {len(demos)}"
+    # As of v0.1 we ship 12 bundled demos (9 original + 3 new failure-mode demos).
+    # Soft check: if the count drops below 12, something likely got removed.
+    assert len(demos) >= 12, f"expected at least 12 bundled demos after v0.1 expansion; found {len(demos)}"
     for d in demos:
         assert (d / "source.txt").exists(), f"missing source.txt in {d}"
         assert (d / "summary.txt").exists(), f"missing summary.txt in {d}"

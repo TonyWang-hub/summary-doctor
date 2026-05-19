@@ -1,0 +1,39 @@
+In a public lecture on the environmental footprint of large-scale
+scientific computing, the speaker — a senior researcher in numerical
+climate modeling — laid out three findings from a multi-year audit of a
+mid-sized academic computing cluster.
+
+First, the audit found that water consumption attributable to cooling
+infrastructure had been systematically under-reported in prior published
+inventories. The corrected figure, after accounting for evaporative losses
+in the cluster's adiabatic cooling stage, was roughly 2.4 times the
+previously reported number. The speaker stressed that this correction
+applies only to the specific cluster studied; it should not be
+extrapolated to facilities that use closed-loop liquid cooling.
+
+Second, the audit measured embodied carbon — that is, the carbon emitted
+in the manufacture of the server hardware itself — against operational
+carbon over a six-year service life. The two were of comparable magnitude,
+with embodied carbon accounting for between 38 and 46 percent of
+lifetime emissions depending on which regional electricity grid the
+cluster was connected to. The speaker explicitly rejected the popular
+framing that "running compute is dirty and building hardware is clean";
+both contribute, and a cluster sited on a carbon-intensive grid will see
+operational emissions dominate, while one sited on a clean grid will see
+embodied carbon dominate.
+
+Third, the audit examined the effect of workload scheduling on emissions
+and found that delay-tolerant batch workloads, when shifted in time to
+align with periods of higher renewable supply on the grid, reduced
+operational carbon by 9 to 14 percent. The speaker cautioned that the
+14 percent upper bound was observed only on one specific regional grid
+during one specific season and that the figure should not be quoted as
+a generic expected outcome.
+
+The speaker concluded that the most impactful single intervention for the
+specific cluster audited was the cooling-water correction itself, because
+correcting the inventory is a prerequisite for any subsequent reduction
+target to be measurable. The speaker did not claim that cooling-water
+correction is the most impactful intervention for scientific computing in
+general; on the contrary, she said that the ranking of interventions is
+strongly cluster-specific.

@@ -164,7 +164,7 @@ Markdown 报告对每条论点都会给出：
 
 ## 自带 demo
 
-3 个示例在 [`demos/`](demos/)。所有 demo 均为**合成数据**——如有雷同纯属巧合。
+12 个示例在 [`demos/`](demos/)。所有 demo 均为**合成数据**——如有雷同纯属巧合。
 
 | Demo | 语言 | 设计意图 |
 |------|------|---------|
@@ -177,6 +177,9 @@ Markdown 报告对每条论点都会给出：
 | `07-temporal-error-en` | English | 年份 / 日期被编造 |
 | `08-fabricated-stats-zh` | 中文 | 数字统计凭空捏造 |
 | `09-faithful-zh` | 中文 | 中文正控——demo 3 的镜像 |
+| `10-quote-out-of-context-en` | English | 整句被原样引用，但紧随其后的限定条件被删除，结论被反转 |
+| `11-number-exaggeration-zh` | 中文 | 单一数字被夸大 10×（"8%" → "80%"），下游推论链次生反转 |
+| `12-cross-language-en-zh` | EN → 中文 | 跨语言边界用例（v0.2 前瞻；mock backend 会显著漏报）|
 
 ---
 
@@ -190,9 +193,20 @@ Markdown 报告对每条论点都会给出：
 
 ---
 
-## 自审计（v0.1.1 上线）
+## 自审计（已上线）
 
-为了让这个项目对自己也诚实，仓库 CI 会跑 `summary-doctor` 审计自己的 README 论点（`make self-audit`）。自审计的局限会在 [`docs/MOCK-LIMITS.md`](docs/MOCK-LIMITS.md) 里如实说明。
+为了让这个项目对自己也诚实，`summary-doctor` 可以指向仓库自己的
+README。提供三个 target，按成本 / 精度递增：
+
+```bash
+make self-audit-mock   # 启发式 mock backend，CI 友好，无需鉴权
+make self-audit        # claude-cli + haiku，复用 Claude Code 订阅鉴权
+make self-audit-opus   # claude-cli + opus，慢但 reversed / softened 边界更准
+```
+
+自审计是 dogfood 冒烟测试，不是精度校准过的 benchmark——具体数字
+怎么读、不能读出什么，详见 [`docs/SELF-AUDIT.md`](docs/SELF-AUDIT.md)；
+mock backend 的已知局限见 [`docs/MOCK-LIMITS.md`](docs/MOCK-LIMITS.md)。
 
 ---
 

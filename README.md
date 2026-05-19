@@ -165,7 +165,7 @@ Stages 3 and 4 call an LLM (Anthropic Claude by default). Stages 1, 2, 5 are det
 
 ## Demos
 
-Three bundled cases live under [`demos/`](demos/). All demos are **synthetic** — any resemblance to specific real speakers, talks, or organizations is unintended.
+Twelve bundled cases live under [`demos/`](demos/). All demos are **synthetic** — any resemblance to specific real speakers, talks, or organizations is unintended.
 
 | Demo | Language | Designed to surface |
 |------|----------|---------------------|
@@ -178,6 +178,9 @@ Three bundled cases live under [`demos/`](demos/). All demos are **synthetic** �
 | `07-temporal-error-en` | English | Year / date fabricated outside source |
 | `08-fabricated-stats-zh` | 中文 | Numeric statistics invented from thin air |
 | `09-faithful-zh` | 中文 | Positive control — Chinese mirror of demo 3 |
+| `10-quote-out-of-context-en` | English | Quote lifted verbatim; the following clarifier is dropped, flipping the meaning |
+| `11-number-exaggeration-zh` | 中文 | One figure inflated 10× ("8%" → "80%"), and the downstream chain inverts main vs. secondary |
+| `12-cross-language-en-zh` | EN → 中文 | Cross-language boundary fixture (v0.2 forward-looking; mock under-reports) |
 
 ---
 
@@ -191,9 +194,21 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---
 
-## Self-audit (lands in v0.1.1)
+## Self-audit (shipped)
 
-To keep this project honest, CI will run `summary-doctor` against the repository's own README claims (`make self-audit`). Limits of self-audit are kept honest in [`docs/MOCK-LIMITS.md`](docs/MOCK-LIMITS.md).
+To keep this project honest, `summary-doctor` can be pointed at the
+repository's own README. Three targets, in increasing cost / fidelity:
+
+```bash
+make self-audit-mock   # heuristic mock backend, CI-safe, no auth
+make self-audit        # claude-cli + haiku — reuses your Claude Code auth
+make self-audit-opus   # claude-cli + opus — slower, sharper boundaries
+```
+
+Self-audit is a dogfood smoke test, not a calibrated benchmark — read
+[`docs/SELF-AUDIT.md`](docs/SELF-AUDIT.md) for what the numbers do and
+do not mean, and [`docs/MOCK-LIMITS.md`](docs/MOCK-LIMITS.md) for the
+mock backend's known weaknesses.
 
 ---
 

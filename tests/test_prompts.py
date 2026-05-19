@@ -83,6 +83,20 @@ def test_classify_prompt_has_softened_vs_reversed_boundary_rule():
     assert pattern.search(CLASSIFY_PROMPT), "softened vs reversed boundary rule missing"
 
 
+def test_classify_prompt_covers_causal_direction_flip():
+    # Causal-direction inversion ("A→B" surfaced as "B→A") is a fail mode
+    # we observed on a smaller model: it labels the flip as exact or
+    # softened because the same entities appear. The prompt must explicitly
+    # cover both English and 中文 phrasing so the model treats causal
+    # flips as `reversed` regardless of source language.
+    assert "causal" in CLASSIFY_PROMPT.lower(), (
+        "CLASSIFY_PROMPT must mention 'causal' direction flips explicitly"
+    )
+    assert "因果" in CLASSIFY_PROMPT, (
+        "CLASSIFY_PROMPT must mention 因果 direction flips for 中文 sources"
+    )
+
+
 def test_classify_prompt_keeps_chain_of_thought_out_of_output():
     # We tell the model to reason internally but not emit reasoning to
     # the output. If this contract drifts, audit reports balloon in size.
