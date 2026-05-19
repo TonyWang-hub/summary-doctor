@@ -146,7 +146,7 @@ for dir in "${DEMOS[@]}"; do
   DEMO_DIVS+=("${div:-?}")
   DEMO_REVS+=("${rev:-0}")
   DEMO_FABS+=("${fab:-0}")
-  sleep 0.3
+  sleep 1.2
 done
 
 # ---------- summary ----------------------------------------------------------
