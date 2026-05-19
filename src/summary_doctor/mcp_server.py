@@ -161,12 +161,40 @@ def build_server() -> Any:
 
         # Imported lazily so the module imports cleanly even when optional
         # backend dependencies (e.g. anthropic SDK) are absent.
+        import tempfile
         from summary_doctor.backends import get_backend
         from summary_doctor.pipeline import Pipeline
 
         be = get_backend(mock=(backend == "mock"), backend=backend, model=model)
         pipeline = Pipeline(backend=be, lang=lang)
-        report = pipeline.run(summary_ref=summary, source_ref=source)
+
+        # Pipeline.run accepts a file path / URL / stdin reference, so when
+        # the caller hands us raw text (the common case for MCP and SDK
+        # callers) we materialise it through temporary files. We use temp
+        # files instead of stdin because MCP itself owns stdin on this
+        # process.
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as summary_f, tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as source_f:
+            summary_f.write(summary)
+            source_f.write(source)
+            summary_path = summary_f.name
+            source_path = source_f.name
+
+        try:
+            report = pipeline.run(
+                summary_ref=summary_path, source_ref=source_path
+            )
+        finally:
+            import os
+            for p in (summary_path, source_path):
+                try:
+                    os.unlink(p)
+                except OSError:
+                    pass
+
         return report.markdown
 
     @mcp.tool()

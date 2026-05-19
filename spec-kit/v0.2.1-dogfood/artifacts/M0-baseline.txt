@@ -1,0 +1,18 @@
+=== M0 baseline · 2026-05-19T08:14:44Z ===
+
+## T0.1 — git state
+HEAD: 984450ab74231ecb4f93785f752579a12d0d2428
+branch: main
+ahead/behind origin/main: 0	1
+porcelain:
+?? spec-kit/v0.2.1-dogfood/artifacts/
+
+## T0.2 — pytest baseline (without mcp pkg)
+.......sssss.............................                                [100%]
+36 passed, 5 skipped in 0.09s
+
+## T0.3 — mcp package absence
+WARNING: Package(s) not found: mcp
+
+## redaction grep (constitution §4)
+spec-kit/v0.2.1-dogfood/constitution.md:No file under `cloud_gh_project/summary-doctor/` may contain the redline tokens listed in `feedback_github_public_push_pii_sop.md` (王卓, dmall, cabinx, cloud_kg, 蒋林泉, 天猫, dataluma, InfoQ, etc.). Every milestone closes with a `grep` of the full list. Zero hits required.

@@ -95,8 +95,8 @@ the most-cited reference case for AI-fabricated legal authority.
 Sources:
 
 - <https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc.>
-- <https://www.seyfarth.com/news-insights/update-on-the-chatgpt-case-counsel-who-submitted-fake-cases-are-sanctioned.html>
-- <https://law.justia.com/cases/federal/district-courts/new-york/nysdce/1:2022cv01461/575368/54/>
+- <https://web.archive.org/web/2024/https://www.seyfarth.com/news-insights/update-on-the-chatgpt-case-counsel-who-submitted-fake-cases-are-sanctioned.html> [archived — origin timeout]
+- <https://web.archive.org/web/2024/https://law.justia.com/cases/federal/district-courts/new-york/nysdce/1:2022cv01461/575368/54/> [archived — origin 403]
 
 The problem is not anecdotal:
 
@@ -107,7 +107,7 @@ The problem is not anecdotal:
 - **ABA Formal Opinion 512 (July 29, 2024)** now requires lawyers to
   ensure the accuracy of all generative-AI outputs related to client
   representation before they are used in judicial proceedings.
-  <https://www.americanbar.org/news/abanews/aba-news-archives/2024/07/aba-issues-first-ethics-guidance-ai-tools/>
+  <https://web.archive.org/web/2024/https://www.americanbar.org/news/abanews/aba-news-archives/2024/07/aba-issues-first-ethics-guidance-ai-tools/> [archived — origin 403]
 
 ### Typical failure modes (and what `summary-doctor` labels them)
 
@@ -171,7 +171,7 @@ Sources:
 NewsGuard's December 2024 monitor found leading chatbots had a
 **combined 62% fail rate** when prompted with provably false news
 claims (40.33% repeated misinformation, 21.67% non-response).
-<https://www.newsguardtech.com/ai-monitor/december-2024-ai-misinformation-monitor/>
+<https://web.archive.org/web/2024/https://www.newsguardtech.com/ai-monitor/december-2024-ai-misinformation-monitor/> [archived — origin timeout]
 
 ### Typical failure modes (and what `summary-doctor` labels them)
 

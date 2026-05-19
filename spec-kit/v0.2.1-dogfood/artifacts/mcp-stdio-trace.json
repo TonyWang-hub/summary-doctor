@@ -1,0 +1,37 @@
+{
+  "frames": [
+    {
+      "kind": "initialize.result",
+      "protocol_version": "2025-11-25",
+      "server_name": "summary-doctor"
+    },
+    {
+      "kind": "tools/list.result",
+      "tool_names": [
+        "audit_summary",
+        "get_demo",
+        "list_labels"
+      ]
+    },
+    {
+      "kind": "tools/call.request",
+      "tool": "audit_summary",
+      "arguments_summary_len": 350,
+      "arguments_source_len": 596,
+      "lang": "en",
+      "backend": "mock"
+    },
+    {
+      "kind": "tools/call.result",
+      "report_chars": 3635,
+      "report_first_120": "# Summary Audit Report\n\n- Model: `mock`\n- Language: `en`\n- Claims analyzed: **7**\n- Divergence score: **0%**\n\n> ⚠️ This ",
+      "is_error": false
+    }
+  ],
+  "validation": {
+    "divergence_lines": [
+      "- Divergence score: **0%**"
+    ],
+    "passes_zero_divergence": true
+  }
+}
