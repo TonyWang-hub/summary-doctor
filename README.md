@@ -9,6 +9,12 @@ English | [简体中文](README.zh-CN.md)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](docs/ROADMAP.md)
 [![PRs: welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
+<p align="center">
+  <img src="docs/banner.svg" alt="summary-doctor: summary + source → 4-class labels (exact / softened / reversed / fabricated) with citations" width="820">
+</p>
+
+> A 30-second demo GIF lands in v0.1.1 — until then the diagram above shows the pipeline.
+
 LLM-generated summaries of public talks, interviews, and articles are now mass-distributed on social platforms. Anecdotal evidence and a growing literature on LLM faithfulness suggest that **a non-trivial fraction of claims in such summaries can diverge from the source material** — sometimes outright reversing the speaker's position.
 
 There is currently no open tool that maps each claim in a summary back to the source and labels the faithfulness. **This project is that tool.**
