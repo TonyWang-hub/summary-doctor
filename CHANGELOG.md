@@ -5,6 +5,57 @@ All notable changes to this project are documented in this file.
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-05-20
+
+Dogfood patch release. v0.2.0 shipped MCP server + Skill manifest + 21
+documentation URLs, none of which had been exercised end-to-end. This
+release closes that gap and fixes a real bug uncovered during the
+process. Built using a Spec-Driven Development (SDD) workflow with all
+artefacts versioned under `spec-kit/v0.2.1-dogfood/`.
+
+### Fixed
+
+- **MCP `audit_summary` tool crashed on non-trivial inputs.** The tool
+  was passing raw summary / source text into `Pipeline.run()` as a
+  `_ref`, which then called `Path(text).exists()`. On macOS APFS a
+  filename longer than 255 bytes raises `OSError 63 (File name too
+  long)` inside `stat()` instead of returning `False`, so any real
+  summary (>255 chars) errored out before reaching the pipeline.
+  Fixed by materialising the raw strings into
+  `tempfile.NamedTemporaryFile`s and passing the paths in. Pipeline
+  semantics unchanged. v0.2.0 shipped with this bug because the v0.2.0
+  MCP tests only checked schema and registration, not end-to-end
+  behaviour.
+
+### Verified
+
+| Gate | Status | Evidence |
+|---|---|---|
+| `pip install -e '.[mcp]'` on supported Python (3.10–3.13) | ✅ | M1 in a Python 3.12 venv |
+| 5 previously-skipped MCP tests | ✅ 5/5 → 12/12 | `artifacts/M1-install-and-smoke.md` |
+| MCP stdio round-trip end-to-end | ✅ 3635-char report, Divergence 0% on demo 03 | `artifacts/mcp-stdio-trace.json` |
+| 21 USE-CASES + COMPLIANCE URLs reachable | ✅ 17 direct 2xx + 4 archived via Wayback | `artifacts/url-audit.md` |
+| Skill manifest triggered in a live Claude Code session | ⏭ **SKIPPED** | `artifacts/skill-session.md` — maintainer chose not to run; structural lint (12/12 mcp pytest) only |
+
+### Added (the SDD trail)
+
+- `spec-kit/v0.2.1-dogfood/` — full SDD record committed alongside the
+  release: spec, plan, tasks, constitution, MOC, five milestone
+  close-outs, captured stdio trace, URL audit table, human runbook.
+- `docs/USE-CASES.md` — four URLs (Justia docket, ABA Op. 512, NewsGuard
+  monitor, Seyfarth ChatGPT-case update) annotated with their Wayback
+  Machine snapshots. The original anti-bot / timeout responses are
+  documented in `artifacts/url-audit.md`.
+
+### Known limits (rolled forward)
+
+- M4 skipped: Skill manifest trigger keywords are NOT exercised
+  end-to-end in a live Claude Code session. Re-runnable via
+  `spec-kit/v0.2.1-dogfood/artifacts/M4-human-runbook.md`. A
+  v0.2.2 issue may be filed once this is run.
+- Python 3.14 is NOT supported by the `mcp` Python SDK (1.27.1).
+  Use Python 3.10 / 3.11 / 3.12 / 3.13 for the `[mcp]` extra.
+
 ## [0.2.0] — 2026-05-19
 
 Distribution layer + use-case & compliance docs. Decided after a three-route
@@ -161,5 +212,6 @@ All demo data is synthetic; any resemblance to specific real speakers, talks, or
 - `docs/launch/` (private promotion material) is `.gitignore`d.
 - The Claude CLI backend never logs the user's prompt or response text; all I/O is in-process.
 
+[0.2.1]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.1
 [0.2.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.0
 [0.1.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.1.0
