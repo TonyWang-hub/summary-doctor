@@ -155,8 +155,16 @@ class AnthropicBackend:
     retry_max_seconds: float = DEFAULT_RETRY_MAX_SECONDS
     decompose_max_tokens: int = 2048
     classify_max_tokens: int = 4096
+    # Prompt-cache TTL. "5m" (default) or "1h" for repeat-source workflows
+    # like nightly self-audit. None disables caching entirely. See
+    # spec-kit/v0.2.2-caching/00-spec.md §3.3 for the trade-off table.
+    cache_ttl: str | None = "5m"
     # Cached client; lazily initialised on first call.
     _client: Any = field(default=None, repr=False)
+    # Last-call usage snapshots (cache_creation_input_tokens /
+    # cache_read_input_tokens etc.) so callers can verify cache hits.
+    last_decompose_usage: dict[str, Any] | None = field(default=None, repr=False)
+    last_classify_usage: dict[str, Any] | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         try:
@@ -174,12 +182,13 @@ class AnthropicBackend:
 
     def decompose(self, summary_text: str, *, lang: str) -> list[str]:
         prompt = DECOMPOSE_PROMPT.format(lang=lang, summary=summary_text)
-        result = self._call_with_fallback(
+        result, usage = self._call_with_fallback(
             prompt=prompt,
             tool=CLAIM_LIST_TOOL_SCHEMA,
             max_tokens=self.decompose_max_tokens,
             stage="decompose",
         )
+        self.last_decompose_usage = usage
         claims = result.get("claims")
         if not isinstance(claims, list) or not all(isinstance(c, str) for c in claims):
             raise RuntimeError(
@@ -196,12 +205,13 @@ class AnthropicBackend:
             claims=json.dumps(claims, ensure_ascii=False),
             source=source_text,
         )
-        result = self._call_with_fallback(
+        result, usage = self._call_with_fallback(
             prompt=prompt,
             tool=CLAIM_AUDIT_TOOL_SCHEMA,
             max_tokens=self.classify_max_tokens,
             stage="classify",
         )
+        self.last_classify_usage = usage
         audits = result.get("audits")
         if not isinstance(audits, list):
             raise RuntimeError(
@@ -244,9 +254,11 @@ class AnthropicBackend:
         tool: dict,
         max_tokens: int,
         stage: str,
-    ) -> dict:
+    ) -> tuple[dict, dict[str, Any] | None]:
         """Run a tool-use call against the primary model; on structural
-        failure, retry once on the fallback model."""
+        failure, retry once on the fallback model. Returns (tool input dict,
+        usage dict) where usage contains cache_creation_input_tokens /
+        cache_read_input_tokens when caching is enabled."""
         try:
             return self._call_tool_use(
                 prompt=prompt,
@@ -283,19 +295,31 @@ class AnthropicBackend:
         max_tokens: int,
         model: str,
         stage: str,
-    ) -> dict:
+    ) -> tuple[dict, dict[str, Any] | None]:
         """One tool-use call against a specific model, with retry on
-        transient transport errors. Returns the tool's `input` dict."""
+        transient transport errors. Returns (tool's input dict, usage dict)."""
         client = self._get_client()
 
+        # Optional top-level cache_control: caches the largest cacheable
+        # prefix (tools + system + leading message content). Per the
+        # spec §3.2, top-level auto-placement is correct here because we
+        # want to cache the full prefix up to and including the prompt's
+        # static portion. Min 4096 tokens — silently no-ops below that.
+        create_kwargs: dict[str, Any] = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "tools": [tool],
+            "tool_choice": {"type": "tool", "name": tool["name"]},
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if self.cache_ttl:
+            cache_control: dict[str, Any] = {"type": "ephemeral"}
+            if self.cache_ttl == "1h":
+                cache_control["ttl"] = "1h"
+            create_kwargs["cache_control"] = cache_control
+
         def _do_call() -> Any:
-            return client.messages.create(
-                model=model,
-                max_tokens=max_tokens,
-                tools=[tool],
-                tool_choice={"type": "tool", "name": tool["name"]},
-                messages=[{"role": "user", "content": prompt}],
-            )
+            return client.messages.create(**create_kwargs)
 
         msg = _retry_call(
             _do_call,
@@ -304,7 +328,28 @@ class AnthropicBackend:
             max_seconds=self.retry_max_seconds,
         )
 
-        return _extract_tool_input(msg, tool_name=tool["name"], stage=stage)
+        # Extract usage block for caller transparency.
+        usage_obj = getattr(msg, "usage", None)
+        usage_dict: dict[str, Any] | None = None
+        if usage_obj is not None:
+            # SDK may return a pydantic model or a plain dict; normalise.
+            if hasattr(usage_obj, "model_dump"):
+                usage_dict = usage_obj.model_dump()
+            elif isinstance(usage_obj, dict):
+                usage_dict = dict(usage_obj)
+            else:
+                # Last resort: pull known fields off the object.
+                usage_dict = {
+                    k: getattr(usage_obj, k, None)
+                    for k in (
+                        "input_tokens",
+                        "output_tokens",
+                        "cache_creation_input_tokens",
+                        "cache_read_input_tokens",
+                    )
+                }
+
+        return _extract_tool_input(msg, tool_name=tool["name"], stage=stage), usage_dict
 
 
 def _extract_tool_input(msg: Any, *, tool_name: str, stage: str) -> dict:

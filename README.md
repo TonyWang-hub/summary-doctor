@@ -149,6 +149,8 @@ The `--mock` backend is a heuristic pipeline-tester, **not** a calibrated detect
 
 See [`docs/EVALUATION.md`](docs/EVALUATION.md) for how the two backends compare on the bundled demo set, and [`docs/PROMPT-ENGINEERING.md`](docs/PROMPT-ENGINEERING.md) for how the Anthropic prompts are designed.
 
+**Prompt caching (v0.2.2):** the `anthropic` backend automatically caches the prompt prefix (`--cache-ttl 5m` default, `1h` for nightly/CI) so repeat-source audits pay drastically less on the second call. Opt out with `--no-cache`. The `claude-cli` backend does NOT cache user-prompt content across invocations — see [`docs/EVALUATION.md`](docs/EVALUATION.md#cache-performance-v022) for the empirical caveat.
+
 ---
 
 ## How it works (5-stage pipeline)

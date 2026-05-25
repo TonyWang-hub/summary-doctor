@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "summary-doctor"
-version = "0.2.1"
+version = "0.2.2"
 description = "Audit AI-generated summaries against their source material. Detect reversals, fabrications, and cherry-picking — with citations, not verdicts."
 readme = "README.md"
 requires-python = ">=3.10"

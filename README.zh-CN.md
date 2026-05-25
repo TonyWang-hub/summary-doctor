@@ -148,6 +148,8 @@ Markdown 报告对每条论点都会给出：
 
 两种 backend 在自带 demo 上的精度对比见 [`docs/EVALUATION.md`](docs/EVALUATION.md)；Anthropic 模式的 prompt 设计见 [`docs/PROMPT-ENGINEERING.md`](docs/PROMPT-ENGINEERING.md)。
 
+**Prompt 缓存 (v0.2.2)**：`anthropic` backend 自动缓存 prompt 前缀（默认 `--cache-ttl 5m`，nightly/CI 用 `1h`），所以同一 source 第二次 audit 大幅省 token。`--no-cache` 可关。`claude-cli` backend **不**会跨 invocation 缓存用户 prompt 内容——详见 [`docs/EVALUATION.md`](docs/EVALUATION.md#cache-performance-v022) 实证。
+
 ---
 
 ## 工作原理（5 阶段流水线）

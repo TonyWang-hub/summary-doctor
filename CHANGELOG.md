@@ -5,6 +5,73 @@ All notable changes to this project are documented in this file.
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] — 2026-05-25
+
+Prompt caching patch. Adds `cache_control` to the Anthropic SDK backend
+path, plumbs `usage` from both backends so callers can verify cache hits,
+locks prompt-byte stability via a new test file. Built via SDD under
+`spec-kit/v0.2.2-caching/` — five milestones, two carify rounds each,
+honest documentation of an assumption that was falsified during M0.
+
+### Added
+
+- `AnthropicBackend`: new `cache_ttl` field (default `"5m"`, accepts
+  `"1h"` or `None`); passes top-level `cache_control={"type": "ephemeral", "ttl": ...}`
+  on every `client.messages.create` call. Cache scope is prompt-prefix
+  bytes + model + API key, persists across SDK calls within TTL.
+- CLI: `--cache-ttl {5m,1h}` and `--no-cache` flags. Ignored by
+  claude-cli and mock backends (which can't control external cache).
+- Both backends now expose `last_decompose_usage` and
+  `last_classify_usage` (dict | None) — populated after each call.
+  Includes `cache_creation_input_tokens` and `cache_read_input_tokens`
+  when caching is active.
+- `tests/test_cache_prefix.py` — 8 tests locking prefix-byte stability:
+  byte-stable rendering of DECOMPOSE_PROMPT / CLASSIFY_PROMPT,
+  deterministic tool-schema serialisation, placeholder-set guard, and
+  forbidden-token check (no `datetime.now`, `uuid4`, `time.time`,
+  `request_id` in any prompt template).
+- 44 pytest pass + 5 skipped (was 36 + 5 in v0.2.1).
+
+### Documented (M0 finding worth shipping with the patch)
+
+M0 falsified a load-bearing v0.2.2 spec assumption: **`claude-cli`
+backend does NOT cache user-prompt content across invocations**.
+Empirically tested — same long prompt sent in two consecutive
+`claude -p` invocations produces `cache_read_input_tokens = 0` on the
+second call. Claude Code's platform-level system+tools prefix (~36K
+tokens) DOES cache cross-invocation, but that is independent of any
+`summary-doctor` workload.
+
+Net effect: the Anthropic SDK path (with the new `cache_control`) is
+the only path that delivers cross-invocation user-prompt cache reuse
+on `summary-doctor` workflows. `claude-cli` users get no workload-level
+cache benefit and never did — v0.2.2 documents that honestly rather
+than implying otherwise.
+
+See `docs/EVALUATION.md` § Cache performance (v0.2.2) for the empirical
+table and `spec-kit/v0.2.2-caching/milestones/M0-baseline-closeout.md`
+for the three-test evidence trail.
+
+### Deferred (honest gap)
+
+The Anthropic SDK code path is wired but **not yet verified with a real
+API call**. The maintainer chose to ship the code with a reproduction
+runbook (`spec-kit/v0.2.2-caching/artifacts/M2-reproduction-runbook.md`)
+rather than block release on a $0.20 API budget. Same honest-gap pattern
+as v0.2.1 M4 SKIPPED.
+
+If you have an `ANTHROPIC_API_KEY` and ~10 minutes, the runbook produces
+the missing `cache_read_input_tokens > 0` evidence and unlocks a v0.2.2.1
+patch that fills in the empty EVALUATION row.
+
+### Known limits (rolled forward)
+
+- DECOMPOSE prompts are often <4096 tokens (Haiku 4.5 cache minimum).
+  Caching silently no-ops below that threshold; CLASSIFY prompts
+  usually clear it once a non-trivial source is included.
+- Python 3.14 still not supported by the `mcp` Python SDK 1.27.1 — use
+  Python 3.10-3.13 for the `[mcp]` extra. (Same as v0.2.1.)
+
 ## [0.2.1] — 2026-05-20
 
 Dogfood patch release. v0.2.0 shipped MCP server + Skill manifest + 21
@@ -212,6 +279,7 @@ All demo data is synthetic; any resemblance to specific real speakers, talks, or
 - `docs/launch/` (private promotion material) is `.gitignore`d.
 - The Claude CLI backend never logs the user's prompt or response text; all I/O is in-process.
 
+[0.2.2]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.2
 [0.2.1]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.1
 [0.2.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.2.0
 [0.1.0]: https://github.com/TonyWang-hub/summary-doctor/releases/tag/v0.1.0

@@ -1,0 +1,60 @@
+{
+  "captured_at": "2026-05-25",
+  "method": "Direct `claude -p --output-format json --model haiku` invocations; parsed result event usage block.",
+  "model": "claude-haiku (subscription, claude-cli routes via Claude Code)",
+  "observations": [
+    {
+      "label": "probe",
+      "prompt": "What is 2+2?",
+      "usage": {
+        "input_tokens": 9,
+        "cache_creation_input_tokens": 40349,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 69,
+        "cache_creation_ephemeral_1h": 40349,
+        "cache_creation_ephemeral_5m": 0
+      }
+    },
+    {
+      "label": "A1",
+      "prompt": "Summarize this in one sentence: <head 200 lines of /tmp/sd-source.txt>",
+      "usage": {
+        "input_tokens": 9,
+        "cache_creation_input_tokens": 41439,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 411,
+        "cache_creation_ephemeral_1h": 41439,
+        "cache_creation_ephemeral_5m": 0
+      }
+    },
+    {
+      "label": "A2",
+      "prompt": "Same as A1, byte-identical",
+      "usage": {
+        "input_tokens": 9,
+        "cache_creation_input_tokens": 42251,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 453,
+        "cache_creation_ephemeral_1h": 42251,
+        "cache_creation_ephemeral_5m": 0,
+        "note": "Same prompt as A1; cache_read still 0. Cross-invocation user-prompt cache does NOT hit."
+      }
+    },
+    {
+      "label": "B1",
+      "prompt": "Different prompt: 'First do X. Then do Y. Document: <head 100 lines>'",
+      "usage": {
+        "input_tokens": 9,
+        "cache_creation_input_tokens": 5145,
+        "cache_read_input_tokens": 36670,
+        "output_tokens": "<not captured>",
+        "cache_creation_ephemeral_1h": 5145,
+        "cache_creation_ephemeral_5m": 0,
+        "note": "Different user prompt; cache_read hit 36670 anyway. This corresponds to Claude Code's internal system+tools bundle, not user-prompt content."
+      }
+    }
+  ],
+  "hypothesis_validated": "cache_read on claude-cli reflects Claude Code's PLATFORM-LEVEL system+tools prefix only. User-prompt content does not cache cross-invocation through `claude -p`. The ~36K-token cache_read in B1 is a fixed platform freebie, not a workload-specific savings.",
+  "implication_for_summary_doctor": "Running summary-doctor twice with the same source via the claude-cli backend does NOT produce user-prompt cache reuse. The ~36K platform cache_read is the same whether you re-audit or not.",
+  "implication_for_v0_2_2_spec": "Spec §3.6 'claude-cli auto caches cross-invocation' framing is falsified for user-prompt content. Rev 3 will distinguish platform-level (auto, always-on, unrelated to summary-doctor) from prompt-level (only via Anthropic SDK + explicit cache_control, not via claude-cli)."
+}

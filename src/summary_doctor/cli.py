@@ -39,6 +39,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip LLM calls; return a canned demo report. Useful for pipeline tests.",
     )
+    p.add_argument(
+        "--cache-ttl",
+        choices=["5m", "1h"],
+        default="5m",
+        help="Anthropic prompt cache TTL. '5m' (default) for interactive use, '1h' for nightly/CI repeat-source workflows. Ignored by claude-cli and mock backends.",
+    )
+    p.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable Anthropic prompt caching (default: enabled with 5m TTL). Ignored by claude-cli and mock backends.",
+    )
     return p
 
 
@@ -49,7 +60,13 @@ def main(argv: list[str] | None = None) -> int:
         or f"summary-audit-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
     )
 
-    backend = get_backend(mock=args.mock, backend=args.backend, model=args.model)
+    cache_ttl = None if args.no_cache else args.cache_ttl
+    backend = get_backend(
+        mock=args.mock,
+        backend=args.backend,
+        model=args.model,
+        cache_ttl=cache_ttl,
+    )
     pipeline = Pipeline(backend=backend, lang=args.lang)
 
     try:

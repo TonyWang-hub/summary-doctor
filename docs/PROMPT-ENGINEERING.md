@@ -138,3 +138,25 @@ gains on a 4-class task are marginal.
 7. **Source paragraph paraphrase.** If the prompt allows "summarise the
    matched paragraph", we lose the verbatim citation guarantee — and with
    it, the entire reason this tool exists.
+
+## Cache prefix stability (v0.2.2)
+
+Anthropic prompt caching is a **prefix-byte match**: a single byte
+difference anywhere in the rendered prefix invalidates everything after
+it. This means a future contributor who innocently adds `datetime.now()`
+or a UUID into one of these prompts will silently destroy the cache for
+every downstream user — with no error.
+
+`tests/test_cache_prefix.py` locks four invariants:
+
+1. `DECOMPOSE_PROMPT.format(lang=L, summary=S)` produces byte-identical
+   output for identical `(L, S)`.
+2. `CLASSIFY_PROMPT.format(lang=L, claims=C, source=Src)` ditto.
+3. `json.dumps()` of both tool schemas is deterministic across calls.
+4. The set of `{placeholders}` in each prompt template is exactly the
+   documented set — any new placeholder is a flag for review.
+
+If you're tempted to add a runtime value to a prompt (timestamp, run
+ID, etc.), do not. Pass it as a separate `messages` entry **after** the
+cache breakpoint instead. Read `shared/prompt-caching.md` (Anthropic
+docs) before touching this code.

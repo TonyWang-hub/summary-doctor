@@ -90,6 +90,14 @@ class ClaudeCliBackend:
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
     # Path to the `claude` executable; resolved once in __post_init__.
     _claude_path: str = field(default="", repr=False)
+    # Last-call usage blocks captured from the `result` event envelope.
+    # Populated after each decompose() / classify() invocation. Includes
+    # cache_creation_input_tokens / cache_read_input_tokens fields when
+    # Claude Code's platform-level prompt cache is active. See
+    # spec-kit/v0.2.2-caching/milestones/M0-baseline-closeout.md for what
+    # these numbers mean (platform-level only, not workload-level).
+    last_decompose_usage: dict[str, Any] | None = field(default=None, repr=False)
+    last_classify_usage: dict[str, Any] | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         path = shutil.which("claude")
@@ -106,7 +114,8 @@ class ClaudeCliBackend:
 
     def decompose(self, summary_text: str, *, lang: str) -> list[str]:
         prompt = DECOMPOSE_PROMPT.format(lang=lang, summary=summary_text)
-        raw = self._invoke(prompt=prompt, stage="decompose")
+        raw, usage = self._invoke(prompt=prompt, stage="decompose")
+        self.last_decompose_usage = usage
         parsed = _parse_json_loose(raw, expect="array", stage="decompose")
         if not isinstance(parsed, list) or not all(isinstance(c, str) for c in parsed):
             raise RuntimeError(
@@ -122,7 +131,8 @@ class ClaudeCliBackend:
             claims=json.dumps(claims, ensure_ascii=False),
             source=source_text,
         )
-        raw = self._invoke(prompt=prompt, stage="classify")
+        raw, usage = self._invoke(prompt=prompt, stage="classify")
+        self.last_classify_usage = usage
         parsed = _parse_json_loose(raw, expect="array", stage="classify")
         if not isinstance(parsed, list):
             raise RuntimeError(
@@ -153,14 +163,19 @@ class ClaudeCliBackend:
 
     # -- internals ---------------------------------------------------------
 
-    def _invoke(self, *, prompt: str, stage: str) -> str:
-        """Run one `claude -p` call. Return the model's textual response.
+    def _invoke(self, *, prompt: str, stage: str) -> tuple[str, dict[str, Any] | None]:
+        """Run one `claude -p` call. Return (model's textual response, usage dict).
 
         We pass the prompt via stdin so we don't have to escape multi-line
         content as an argv argument. `--output-format json` makes the CLI
         emit a small JSON envelope from which we extract the `result`
-        string; if the envelope is missing or malformed we fall back to
-        using stdout verbatim.
+        string AND the `usage` block; if the envelope is missing or
+        malformed we fall back to using stdout verbatim with usage=None.
+
+        The returned `usage` dict contains cache_creation_input_tokens /
+        cache_read_input_tokens populated by Claude Code's platform-level
+        prompt cache. See spec-kit/v0.2.2-caching/milestones/M0-baseline-
+        closeout.md for the empirical scope of that cache.
         """
         argv = [
             self._claude_path,
@@ -204,12 +219,13 @@ class ClaudeCliBackend:
         # in the wild:
         #   (a) single dict with a `result` string (older CLI / some flags)
         #   (b) JSON array of stream events (current CLI); the final
-        #       `{"type":"result","result":"...","is_error":...}` carries
-        #       the model's textual reply.
+        #       `{"type":"result","result":"...","is_error":...,"usage":{...}}`
+        #       carries the model's textual reply AND the usage block.
         try:
             envelope = json.loads(stdout)
             if isinstance(envelope, dict) and isinstance(envelope.get("result"), str):
-                return envelope["result"].strip()
+                usage = envelope.get("usage") if isinstance(envelope.get("usage"), dict) else None
+                return envelope["result"].strip(), usage
             if isinstance(envelope, list):
                 for item in reversed(envelope):
                     if (
@@ -217,11 +233,12 @@ class ClaudeCliBackend:
                         and item.get("type") == "result"
                         and isinstance(item.get("result"), str)
                     ):
-                        return item["result"].strip()
+                        usage = item.get("usage") if isinstance(item.get("usage"), dict) else None
+                        return item["result"].strip(), usage
         except json.JSONDecodeError:
             pass
-        # Fallback: treat stdout itself as the model reply.
-        return stdout
+        # Fallback: treat stdout itself as the model reply; no usage available.
+        return stdout, None
 
 
 # ---------------------------------------------------------------------------

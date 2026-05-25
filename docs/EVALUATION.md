@@ -132,6 +132,41 @@ PYTHONPATH=src python3 eval/run-eval.py --with-cli # mock + claude-cli haiku
    alignment is still a v0.2 target — the Anthropic numbers here are an
    under-promise, not a v0.1 feature claim.
 
+## Cache performance (v0.2.2)
+
+v0.2.2 wires Anthropic prompt caching into the `anthropic` backend
+(`cache_control={"type": "ephemeral"}` on every `messages.create` call,
+with a `--cache-ttl {5m,1h}` knob and a `--no-cache` opt-out). v0.2.2
+also plumbs the `usage` block from both the `anthropic` and
+`claude-cli` backends into the per-call `last_*_usage` attributes
+(see `spec-kit/v0.2.2-caching/00-spec.md` §3.6).
+
+### What the caching wiring delivers, by backend
+
+| Backend | Cross-invocation user-prompt cache? | Evidence |
+|---|---|---|
+| `claude-cli` (subscription) | **No.** Empirically tested. Same user prompt re-sent in a fresh `claude -p` invocation produces `cache_read_input_tokens = 0`. Claude Code's platform-level system+tools prefix (~36K tokens) DOES cache cross-invocation, but that is independent of `summary-doctor`'s workload. | M0 baseline run: see `spec-kit/v0.2.2-caching/artifacts/M0-baseline-claude-cli.json`. |
+| `anthropic` SDK + `cache_control` | **Code path wired; not yet verified with a real API call.** Cache should activate when the rendered prefix is ≥4096 tokens (Haiku 4.5 / Opus 4.7 minimum). The DECOMPOSE prompt is often <4096 tokens for short summaries — caching silently no-ops there. The CLASSIFY prompt usually exceeds the minimum once a non-trivial source is included. | Reproduction runbook: `spec-kit/v0.2.2-caching/artifacts/M2-reproduction-runbook.md`. ~$0.20 to verify. |
+
+### Why no real numbers yet
+
+The v0.2.2 patch shipped the code path complete (44/44 pytest, prefix-stability guard tests, CLI flags, plumbing through both backends) but **deferred the real-API verification** to anyone with an `ANTHROPIC_API_KEY` who runs the runbook. Constitution §1 (honesty over coverage) applies: rather than ship a cache_read number that nobody captured from a real call, the patch ships honest "verification pending" and a reproducible procedure.
+
+### Honest numbers from M0 (claude-cli, platform-level only)
+
+For reference, what M0 captured from `claude -p --output-format json`:
+
+| Call | input_tokens | cache_creation | cache_read | Interpretation |
+|---|--:|--:|--:|---|
+| probe ("What is 2+2?") | 9 | 40,349 | 0 | first invocation; Claude Code system prefix written to cache |
+| A1 (same long prompt as A2) | 9 | 41,439 | 0 | new invocation; user prompt newly cached |
+| A2 (**identical bytes to A1**) | 9 | 42,251 | **0** | new invocation; **user-prompt cache did NOT hit** — confirms claude-cli per-invocation isolation |
+| B1 (different prompt) | 9 | 5,145 | **36,670** | new invocation but DIFFERENT prompt; the cache_read corresponds to Claude Code's platform-level system+tools prefix, **NOT to summary-doctor user-prompt content** |
+
+These numbers are **not** the v0.2.2 thesis. They're the M0 finding that motivated the rev-3 honest scope: claude-cli users do not get cross-invocation user-prompt cache savings, full stop. Any "cache_read" they see is platform-level freebie.
+
+The Anthropic SDK path is the only one that could deliver workload-level cache reuse. That verification is deferred.
+
 ## Limits of this evaluation
 
 1. **Demo set is synthetic and small (n=12).** Real-world precision will
